@@ -3,13 +3,15 @@
 
 class Food {
 public:
-  Food(int p_xpos, int p_ypos);
+  Food(Vector2 p_position);
   void render();
-  int get_x_pos();
-  int get_y_pos();
+  Vector2 get_position();
+  float consume();
+  bool is_consumed();
+  void set_position(Vector2 p_position);
+  void set_energy(float p_energy);
 
-  private:
-  int m_xpos;
-  int m_ypos;
-  float m_energy = 0.50;
+private:
+  Vector2 m_position;
+  float m_energy = 0.50F;
 };

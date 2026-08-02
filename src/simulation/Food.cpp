@@ -1,17 +1,22 @@
 #include "Food.h"
 #include <raylib.h>
 
-Food::Food(int p_xpos, int p_ypos) {
-  m_xpos = p_xpos;
-  m_ypos = p_ypos;
+Food::Food(Vector2 p_position) : m_position(p_position) {}
+
+void Food::render() {
+  DrawCircle((int)m_position.x, (int)m_position.y, 3.0F, BLUE);
 }
 
-void Food::render() { DrawCircle(m_xpos, m_ypos, 3.0F, BLUE); }
+Vector2 Food::get_position() { return m_position; }
 
-int Food::get_x_pos() {
-    return m_xpos;
+float Food::consume() {
+  float energy = m_energy;
+  m_energy = 0.f;
+  return energy;
 }
 
-int Food::get_y_pos() {
-    return m_ypos;
-}
+bool Food::is_consumed() { return m_energy <= 0; }
+
+void Food::set_position(Vector2 p_position) { m_position = p_position; }
+
+void Food::set_energy(float p_energy) { m_energy = p_energy; }

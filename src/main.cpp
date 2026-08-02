@@ -1,21 +1,11 @@
-#include <raylib.h>
-#include "simulation/World.h"
+#include "app/Application.h"
 
 int main() {
-  constexpr int screenWidth = 1920;
-  constexpr int screenHeight = 1080;
+  Application app;
 
-  InitWindow(screenWidth, screenHeight, "EvoSim");
-  SetTargetFPS(144);
-  World world;
+  app.setup();
+  app.loop();
+  app.end();
 
-  while (!WindowShouldClose()) {
-    BeginDrawing();
-    world.update();
-    world.render();
-    EndDrawing();
-  }
-
-  CloseWindow();
   return 0;
 }
