@@ -106,6 +106,7 @@ add_executable(
     src/simulation/Agent.cpp
     src/simulation/Food.cpp
     src/neural/NeuralNetwork.cpp
+    src/ui/Theme.cpp
     src/ui/ViewportPanel.cpp
     src/ui/InspectorPanel.cpp
     src/ui/StatisticsPanel.cpp

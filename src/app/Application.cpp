@@ -4,8 +4,9 @@
 #include <memory>
 #include <raylib.h>
 
-#include "./layers/SimulationLayer.h"
+#include "../ui/Theme.h"
 #include "./layers/EditorLayer.h"
+#include "./layers/SimulationLayer.h"
 
 constexpr int k_screen_width = 1920;
 constexpr int k_screen_height = 1080;
@@ -21,6 +22,10 @@ void Application::setup() {
 
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/static/Inter_18pt-Regular.ttf", 17.0f);
+
+  // apply custom theme
+  Theme::apply_evosim_theme();
 
   // add application layers
   m_layers.push_back(std::make_unique<EditorLayer>(m_context));
@@ -38,7 +43,8 @@ void Application::loop() {
 
     // rendering layers
     BeginDrawing(); // starts drawing anything
-    ClearBackground(BLACK); // clears background for hole application but not imgui windows
+    ClearBackground(
+        BLACK); // clears background for hole application but not imgui windows
 
     for (auto &layer : m_layers) {
       layer->on_render();

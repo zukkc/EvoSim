@@ -10,7 +10,7 @@ void InspectorPanel::on_update(float) {
 void InspectorPanel::on_gui_render() {
   ImGui::Begin("Inspector");
 
-  if (m_active == nullptr) {
+  if (m_active == nullptr || m_active->is_dead()) {
     ImGui::Text("There is no active Agent");
   } else {
     ImGui::Text("Agent ID: %i", m_active->get_id());

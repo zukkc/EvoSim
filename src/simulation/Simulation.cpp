@@ -33,7 +33,6 @@ void Simulation::update(float p_dt) {
 
     agent->update(p_dt, m_food);
 
-    // sprawdzanie czy trzeba dodac dzieciaki do kolejki spawnowania
     if (agent->get_energy() > agent->get_reproduce_threshold() &&
         agent->get_reproduction_cooldown() <= 0) {
       Genome gens = agent->repruduce();
@@ -41,13 +40,17 @@ void Simulation::update(float p_dt) {
     }
   }
 
-  // spawnowanie kolejki dzieciakow
   for (auto &child : offspring) {
     m_population.push_back(std::move(child));
   }
 
-  std::erase_if(m_population, [](const std::unique_ptr<Agent> &agent) {
-    return agent == nullptr || agent->is_dead();
+  std::erase_if(m_population, [this](const std::unique_ptr<Agent> &agent) {
+    const bool is_agent_died = agent == nullptr || agent->is_dead();
+    // if agent just die and he is active in inspector then clear him out from inspector
+    if (is_agent_died && m_active_in_ispector != nullptr && agent->get_id() == m_active_in_ispector->get_id()) {
+      m_active_in_ispector = nullptr;
+    }
+    return is_agent_died;
   });
 
   for (auto &food : m_food) {
@@ -78,7 +81,6 @@ void Simulation::render() {
     food->render();
   }
 }
-
 
 Agent *Simulation::find_agent_at(Vector2 world_position) {
   for (auto &agent : m_population) {
