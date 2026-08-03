@@ -3,6 +3,8 @@
 #include <array>
 #include <random>
 
+#include "neural/Genome.h"
+
 class NeuralNetwork {
 public:
   NeuralNetwork();
@@ -10,7 +12,9 @@ public:
   // in:    direction_to_food, distance_to_food, energy, distance_to_border,
   // out:   speed, direction
   std::array<float, 2> forward(std::array<float, 5> p_inputs);
-  std::array<float, 12> mutate();
+  Genome mutate();
+  
+  const Genome &get_genome() const;
 
 private:
   std::array<float, 12> m_genome;

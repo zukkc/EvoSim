@@ -8,6 +8,7 @@ class EditorLayer : public Layer {
 
 public:
   explicit EditorLayer(AppContext &context);
+  void on_update(float p_dt) override;
   void on_gui_render() override;
 
   private:

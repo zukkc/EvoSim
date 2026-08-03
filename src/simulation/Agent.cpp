@@ -8,6 +8,7 @@
 #include <limits>
 #include <memory>
 #include <raylib.h>
+#include <sys/types.h>
 #include <vector>
 
 namespace {
@@ -46,7 +47,8 @@ void Agent::update(float p_deltaTime,
       std::min(screen_width, screen_height) * 0.5F;
 
   std::array<float, 5> inputs{
-      closest.direction / PI, closest.distance / screen_diagonal,
+      closest.direction / PI, 
+      closest.distance / screen_diagonal,
       std::clamp(m_energy, 0.0F, 1.0F),
       std::clamp(get_distance_to_border() / max_border_distance, 0.0F, 1.0F),
       0.0F};
@@ -66,7 +68,12 @@ void Agent::update(float p_deltaTime,
 }
 
 void Agent::render() {
-  DrawCircleV(m_position, 10.0F, WHITE);
+  if (m_is_active) {
+    DrawCircleV(m_position, m_radius + 1, GREEN);
+    DrawRectangleV({m_position.x - 21.0F, m_position.y - 21.0F}, {42.0F, 7.0F},
+                   GREEN);
+  }
+  DrawCircleV(m_position, m_radius, WHITE);
 
   DrawRectangleV({m_position.x - 20.0F, m_position.y - 20.0F}, {40.0F, 5.0F},
                  GRAY);
@@ -80,11 +87,22 @@ Genome Agent::repruduce() {
   return m_neural_network->mutate();
 }
 
-bool Agent::is_dead() { return m_energy <= 0; }
-float Agent::get_energy() { return m_energy; }
-float Agent::get_reproduce_threshold() { return m_reproduction_threshold; }
-float Agent::get_reproduction_cooldown() { return m_reproduction_cooldown; }
-Vector2 Agent::get_position() { return m_position; }
+void Agent::set_active(bool p_active) { m_is_active = p_active; }
+
+int Agent::get_id() const { return 777; }
+bool Agent::is_dead() const { return m_energy <= 0; }
+float Agent::get_energy() const { return m_energy; }
+const Genome &Agent::get_genome() const {
+  return m_neural_network->get_genome();
+}
+float Agent::get_reproduce_threshold() const {
+  return m_reproduction_threshold;
+}
+float Agent::get_reproduction_cooldown() const {
+  return m_reproduction_cooldown;
+}
+Vector2 Agent::get_position() const { return m_position; }
+float Agent::get_radius() const { return m_radius; }
 
 // ================================================= //
 

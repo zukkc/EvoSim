@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Food.h"
-#include "neural/NeuralNetwork.h"
 #include "raylib.h"
 #include <array>
 #include <memory>
 #include <vector>
 
-using Genome = std::array<float, 12>;
+#include "Food.h"
+#include "neural/NeuralNetwork.h"
 
 struct ClosestFoodData {
   Food *food;
@@ -25,12 +24,17 @@ public:
               const std::vector<std::unique_ptr<Food>> &p_all_food);
   void render();
 
-  bool is_dead();
-  float get_energy();
-  float get_reproduce_threshold();
-  float get_reproduction_cooldown();
-  Vector2 get_position();
+  int get_id() const;
+  bool is_dead() const;
+  float get_energy() const;
+  const Genome &get_genome() const;
+  float get_reproduce_threshold() const;
+  float get_reproduction_cooldown() const;
+  Vector2 get_position() const;
+  float get_radius() const;
+
   Genome repruduce();
+  void set_active(bool p_active);
 
 private:
   NeuralNetwork *m_neural_network;
@@ -40,7 +44,9 @@ private:
   float m_speed = 0;
   float m_rotation = 0;
   float m_reproduction_threshold = 1.1F;
-  float m_reproduction_cooldown = 5.F;
+  float m_reproduction_cooldown = 5.0F;
+  float m_radius = 10.0F;
+  bool m_is_active = false;
 
   ClosestFoodData
   find_closest(const std::vector<std::unique_ptr<Food>> &p_all_food);

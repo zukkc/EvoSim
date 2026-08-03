@@ -1,10 +1,12 @@
 #include "ViewportPanel.h"
 #include "app/Context.h"
 #include "raylib.h"
+#include "simulation/Agent.h"
 
 #include <algorithm>
 #include <imgui.h>
 #include <rlImGui.h>
+#include <iostream>
 
 void ViewportPanel::on_gui_render() {
 
@@ -49,6 +51,7 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
   Camera2D &camera = viewport.camera;
 
   constexpr ImGuiMouseButton pan_button = ImGuiMouseButton_Right;
+  constexpr ImGuiMouseButton click_button = ImGuiMouseButton_Left;
   const ImVec2 mouse = ImGui::GetIO().MousePos;
   const float wheel = ImGui::GetIO().MouseWheel;
 
@@ -62,12 +65,11 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
       local_y * static_cast<float>(viewport.render_texture.texture.height) /
           image_size.y};
 
+  Vector2 mouse_world_position =
+      GetScreenToWorld2D(texture_mouse_position, camera);
 
   // ZOOMING
   if (wheel != 0.0f) {
-    const Vector2 mouse_position_in_world_before_zoom =
-        GetScreenToWorld2D(texture_mouse_position, camera);
-
     constexpr float zoom_speed = 0.15f;
 
     camera.zoom *= std::exp(wheel * zoom_speed);
@@ -76,10 +78,13 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
     const Vector2 mouse_position_in_world_after_zoom =
         GetScreenToWorld2D(texture_mouse_position, camera);
 
-    camera.target.x += mouse_position_in_world_before_zoom.x -
-                       mouse_position_in_world_after_zoom.x;
-    camera.target.y += mouse_position_in_world_before_zoom.y -
-                       mouse_position_in_world_after_zoom.y;
+    camera.target.x +=
+        mouse_world_position.x - mouse_position_in_world_after_zoom.x;
+    camera.target.y +=
+        mouse_world_position.y - mouse_position_in_world_after_zoom.y;
+
+    // updating mouse position in world after zoom
+    mouse_world_position = mouse_position_in_world_after_zoom;
   }
   // =======
 
@@ -99,5 +104,14 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
 
     ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
   }
-  // ======
+  // =======
+
+  // CLICKING
+  if (p_is_viewport_hovered && ImGui::IsMouseClicked(click_button)) {
+    Simulation &simulation = m_context.simulation;   
+    Agent *found = simulation.find_agent_at(mouse_world_position);
+    if (found == nullptr) return;
+    simulation.set_active_in_inspector(found);
+  }
+  // =======
 }

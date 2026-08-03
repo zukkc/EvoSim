@@ -79,6 +79,38 @@ void Simulation::render() {
   }
 }
 
-size_t Simulation::get_agent_count() {
-  return m_population.size();
+
+Agent *Simulation::find_agent_at(Vector2 world_position) {
+  for (auto &agent : m_population) {
+    if (is_point_inside_agent(world_position, *agent)) {
+      return agent.get();
+    }
+  }
+
+  return nullptr;
+}
+
+void Simulation::set_active_in_inspector(Agent *p_agent) {
+  if (m_active_in_ispector != nullptr && p_agent != nullptr) {
+    m_active_in_ispector->set_active(false);
+  }
+  if (p_agent != nullptr) {
+    p_agent->set_active(true);
+    m_active_in_ispector = p_agent;
+  }
+}
+
+size_t Simulation::get_agent_count() { return m_population.size(); }
+Agent *Simulation::get_active_in_inspector() { return m_active_in_ispector; }
+
+/////////////////////////////////////
+
+bool Simulation::is_point_inside_agent(Vector2 point, const Agent &agent) {
+  const float dx = point.x - agent.get_position().x;
+  const float dy = point.y - agent.get_position().y;
+
+  const float distance_squared = dx * dx + dy * dy;
+  const float radius = agent.get_radius();
+
+  return distance_squared <= radius * radius;
 }

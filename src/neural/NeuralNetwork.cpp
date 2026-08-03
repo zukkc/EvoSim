@@ -36,3 +36,5 @@ std::array<float, 12> NeuralNetwork::mutate() {
   }
   return new_genome;
 }
+
+const Genome &NeuralNetwork::get_genome() const { return m_genome; }

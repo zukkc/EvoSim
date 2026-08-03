@@ -23,8 +23,8 @@ void Application::setup() {
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // add application layers
-  m_layers.push_back(std::make_unique<SimulationLayer>(m_context));
   m_layers.push_back(std::make_unique<EditorLayer>(m_context));
+  m_layers.push_back(std::make_unique<SimulationLayer>(m_context));
 }
 
 void Application::loop() {
