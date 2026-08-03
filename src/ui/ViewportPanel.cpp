@@ -1,4 +1,6 @@
 #include "ViewportPanel.h"
+#include "app/Context.h"
+#include "raylib.h"
 
 #include <algorithm>
 #include <imgui.h>
@@ -36,21 +38,52 @@ void ViewportPanel::on_gui_render() {
 }
 
 void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
-  constexpr ImGuiMouseButton pan_button = ImGuiMouseButton_Left;
+  const ImVec2 image_min = ImGui::GetItemRectMin();
+  const ImVec2 image_size = ImGui::GetItemRectSize();
 
-  Camera2D &camera = m_context.viewport.camera;
-
-  if (p_is_viewport_hovered) {
-    const float wheel = ImGui::GetIO().MouseWheel;
-
-    if (wheel != 0.0f) {
-      constexpr float zoom_step = 0.15f;
-
-      camera.zoom *= 1.0f + wheel * zoom_step;
-      camera.zoom = std::clamp(camera.zoom, 0.1f, 20.0f);
-    }
+  if (!p_is_viewport_hovered || image_size.x <= 0.0f || image_size.y <= 0.0f) {
+    return;
   }
 
+  ViewportContext &viewport = m_context.viewport;
+  Camera2D &camera = viewport.camera;
+
+  constexpr ImGuiMouseButton pan_button = ImGuiMouseButton_Right;
+  const ImVec2 mouse = ImGui::GetIO().MousePos;
+  const float wheel = ImGui::GetIO().MouseWheel;
+
+  const float local_x = mouse.x - image_min.x;
+  const float local_y = mouse.y - image_min.y;
+
+  const Vector2 texture_mouse_position{
+      local_x * static_cast<float>(viewport.render_texture.texture.width) /
+          image_size.x,
+
+      local_y * static_cast<float>(viewport.render_texture.texture.height) /
+          image_size.y};
+
+
+  // ZOOMING
+  if (wheel != 0.0f) {
+    const Vector2 mouse_position_in_world_before_zoom =
+        GetScreenToWorld2D(texture_mouse_position, camera);
+
+    constexpr float zoom_speed = 0.15f;
+
+    camera.zoom *= std::exp(wheel * zoom_speed);
+    camera.zoom = std::clamp(camera.zoom, 0.1f, 20.0f);
+
+    const Vector2 mouse_position_in_world_after_zoom =
+        GetScreenToWorld2D(texture_mouse_position, camera);
+
+    camera.target.x += mouse_position_in_world_before_zoom.x -
+                       mouse_position_in_world_after_zoom.x;
+    camera.target.y += mouse_position_in_world_before_zoom.y -
+                       mouse_position_in_world_after_zoom.y;
+  }
+  // =======
+
+  // PANNING
   if (p_is_viewport_hovered && ImGui::IsMouseClicked(pan_button)) {
     m_is_panning = true;
   }
@@ -60,11 +93,11 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
   }
 
   if (m_is_panning) {
-    const ImVec2 delta = ImGui::GetIO().MouseDelta;
-
-    camera.target.x -= delta.x / camera.zoom;
-    camera.target.y -= delta.y / camera.zoom;
+    const ImVec2 mouse_delta = ImGui::GetIO().MouseDelta;
+    camera.target.x -= mouse_delta.x / camera.zoom;
+    camera.target.y -= mouse_delta.y / camera.zoom;
 
     ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
   }
+  // ======
 }
