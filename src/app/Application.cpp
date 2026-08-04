@@ -8,6 +8,8 @@
 #include "./layers/EditorLayer.h"
 #include "./layers/SimulationLayer.h"
 
+namespace evosim {
+
 constexpr int k_screen_width = 1920;
 constexpr int k_screen_height = 1080;
 constexpr const char *k_app_name = "EvoSim";
@@ -22,10 +24,11 @@ void Application::setup() {
 
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/static/Inter_18pt-Regular.ttf", 17.0f);
+  io.Fonts->AddFontFromFileTTF(
+      "assets/fonts/Inter/static/Inter_18pt-Regular.ttf", 17.0f);
 
   // apply custom theme
-  Theme::apply_evosim_theme();
+  apply_evosim_theme();
 
   // add application layers
   m_layers.push_back(std::make_unique<EditorLayer>(m_context));
@@ -67,3 +70,5 @@ void Application::end() {
   rlImGuiShutdown();
   m_window.close();
 }
+
+} // namespace evosim

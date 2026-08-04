@@ -1,11 +1,13 @@
 #pragma once
 #include <memory>
-#include <vector>
 #include <raylib.h>
+#include <vector>
 
-#include "Window.h"
 #include "./layers/Layer.h"
+#include "Window.h"
 #include "app/Context.h"
+
+namespace evosim {
 
 class Application {
 public:
@@ -18,3 +20,5 @@ private:
   Window m_window;
   std::vector<std::unique_ptr<Layer>> m_layers;
 };
+
+} // namespace evosim

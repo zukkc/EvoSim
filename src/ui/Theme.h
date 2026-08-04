@@ -1,6 +1,7 @@
 #pragma once
 
-namespace Theme
-{
-    void apply_evosim_theme();
+namespace evosim {
+
+void apply_evosim_theme();
+
 }

@@ -2,6 +2,8 @@
 #include <array>
 #include <cmath>
 
+namespace evosim {
+
 NeuralNetwork::NeuralNetwork()
     : m_generator(std::random_device{}()), m_distribution(-1.0f, 1.0f) {
   std::array<float, 12> genome;
@@ -12,8 +14,8 @@ NeuralNetwork::NeuralNetwork()
 }
 
 NeuralNetwork::NeuralNetwork(std::array<float, 12> p_genome)
-    : m_genome(p_genome), m_generator(std::random_device{}()), m_distribution(-1.0f, 1.0f) {
-}
+    : m_genome(p_genome), m_generator(std::random_device{}()),
+      m_distribution(-1.0f, 1.0f) {}
 
 std::array<float, 2> NeuralNetwork::forward(std::array<float, 5> p_inputs) {
 
@@ -38,3 +40,5 @@ std::array<float, 12> NeuralNetwork::mutate() {
 }
 
 const Genome &NeuralNetwork::get_genome() const { return m_genome; }
+
+} // namespace evosim

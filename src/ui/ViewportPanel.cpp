@@ -5,8 +5,10 @@
 
 #include <algorithm>
 #include <imgui.h>
-#include <rlImGui.h>
 #include <iostream>
+#include <rlImGui.h>
+
+namespace evosim {
 
 void ViewportPanel::on_gui_render() {
 
@@ -108,10 +110,13 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
 
   // CLICKING
   if (p_is_viewport_hovered && ImGui::IsMouseClicked(click_button)) {
-    Simulation &simulation = m_context.simulation;   
+    Simulation &simulation = m_context.simulation;
     Agent *found = simulation.find_agent_at(mouse_world_position);
-    if (found == nullptr) return;
+    if (found == nullptr)
+      return;
     simulation.set_active_in_inspector(found);
   }
   // =======
 }
+
+} // namespace evosim

@@ -5,6 +5,8 @@
 
 #include "neural/Genome.h"
 
+namespace evosim {
+
 class NeuralNetwork {
 public:
   NeuralNetwork();
@@ -13,7 +15,7 @@ public:
   // out:   speed, direction
   std::array<float, 2> forward(std::array<float, 5> p_inputs);
   Genome mutate();
-  
+
   const Genome &get_genome() const;
 
 private:
@@ -22,3 +24,5 @@ private:
   std::mt19937 m_generator;
   std::uniform_real_distribution<float> m_distribution;
 };
+
+} // namespace evosim

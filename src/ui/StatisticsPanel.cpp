@@ -4,6 +4,8 @@
 #include <imgui.h>
 #include <rlImGui.h>
 
+namespace evosim {
+
 void StatisticsPanel::on_gui_render() {
   ImGui::Begin("Statistics");
 
@@ -12,3 +14,5 @@ void StatisticsPanel::on_gui_render() {
 
   ImGui::End();
 }
+
+} // namespace evosim

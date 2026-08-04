@@ -1,6 +1,8 @@
 #include "SimulationLayer.h"
 #include "raylib.h"
 
+namespace evosim {
+
 SimulationLayer::SimulationLayer(AppContext &context) : m_context(context) {
   m_context.viewport.render_texture = LoadRenderTexture(1920, 1080);
 
@@ -55,3 +57,5 @@ void SimulationLayer::resize_viewport_if_needed() {
 
   SetTextureFilter(viewport.render_texture.texture, TEXTURE_FILTER_BILINEAR);
 }
+
+} // namespace evosim

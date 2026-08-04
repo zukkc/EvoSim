@@ -2,6 +2,8 @@
 
 #include "../app/Context.h"
 
+namespace evosim {
+
 class Panel {
 public:
   explicit Panel(AppContext &context) : m_context(context) {}
@@ -14,3 +16,5 @@ public:
 protected:
   AppContext &m_context;
 };
+
+} // namespace evosim

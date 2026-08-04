@@ -1,7 +1,7 @@
 #include "app/Application.h"
 
 int main() {
-  Application app;
+  evosim::Application app;
 
   app.setup();
   app.loop();

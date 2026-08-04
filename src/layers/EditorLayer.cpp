@@ -3,9 +3,11 @@
 #include <memory>
 #include <rlImGui.h>
 
-#include "../ui/ViewportPanel.h"
 #include "../ui/InspectorPanel.h"
 #include "../ui/StatisticsPanel.h"
+#include "../ui/ViewportPanel.h"
+
+namespace evosim {
 
 EditorLayer::EditorLayer(AppContext &context) : m_context(context) {
   m_panels.push_back(std::make_unique<ViewportPanel>(context));
@@ -24,3 +26,5 @@ void EditorLayer::on_gui_render() {
     panel->on_gui_render();
   }
 }
+
+} // namespace evosim

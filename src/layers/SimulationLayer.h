@@ -5,6 +5,8 @@
 #include "./app/Context.h"
 #include "Layer.h"
 
+namespace evosim {
+
 class SimulationLayer : public Layer {
 public:
   explicit SimulationLayer(AppContext &context);
@@ -17,3 +19,5 @@ private:
 
   void resize_viewport_if_needed();
 };
+
+} // namespace evosim

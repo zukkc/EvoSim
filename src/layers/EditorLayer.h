@@ -1,8 +1,10 @@
-#include "layers/Layer.h"
 #include "./app/Context.h"
 #include "./ui/Panel.h"
+#include "layers/Layer.h"
 #include <memory>
 #include <vector>
+
+namespace evosim {
 
 class EditorLayer : public Layer {
 
@@ -11,7 +13,9 @@ public:
   void on_update(float p_dt) override;
   void on_gui_render() override;
 
-  private:
+private:
   AppContext &m_context;
   std::vector<std::unique_ptr<Panel>> m_panels;
 };
+
+} // namespace evosim

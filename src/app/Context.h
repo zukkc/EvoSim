@@ -2,6 +2,8 @@
 
 #include "./simulation/Simulation.h"
 
+namespace evosim {
+
 struct ViewportContext {
   RenderTexture2D render_texture{};
 
@@ -18,3 +20,5 @@ struct AppContext {
   Simulation simulation;
   ViewportContext viewport;
 };
+
+}

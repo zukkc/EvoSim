@@ -11,18 +11,19 @@
 #include <sys/types.h>
 #include <vector>
 
-namespace {
-constexpr float max_speed = 100.0F;
-constexpr float turn_speed = 2.0F;
-constexpr float energy_cost_per_pixel = 0.001F;
-} // namespace
+namespace evosim {
 
-Agent::Agent(Vector2 p_position) : m_position(p_position) {
+constexpr float k_max_speed = 100.0F;
+constexpr float k_turn_speed = 2.0F;
+constexpr float k_energy_cost_per_pixel = 0.001F;
+
+Agent::Agent(int p_id, Vector2 p_position)
+    : m_id(p_id), m_position(p_position) {
   m_neural_network = new NeuralNetwork();
 }
 
-Agent::Agent(Vector2 p_position, std::array<float, 12> p_genome)
-    : m_position(p_position) {
+Agent::Agent(int p_id, Vector2 p_position, std::array<float, 12> p_genome)
+    : m_id(p_id), m_position(p_position) {
   m_neural_network = new NeuralNetwork(p_genome);
 }
 
@@ -47,24 +48,23 @@ void Agent::update(float p_deltaTime,
       std::min(screen_width, screen_height) * 0.5F;
 
   std::array<float, 5> inputs{
-      closest.direction / PI, 
-      closest.distance / screen_diagonal,
+      closest.direction / PI, closest.distance / screen_diagonal,
       std::clamp(m_energy, 0.0F, 1.0F),
       std::clamp(get_distance_to_border() / max_border_distance, 0.0F, 1.0F),
       0.0F};
 
   auto outputs = m_neural_network->forward(inputs);
 
-  m_speed = outputs[0] * max_speed;
+  m_speed = outputs[0] * k_max_speed;
 
   const float turn_input = outputs[1];
 
-  m_rotation += turn_input * turn_speed * p_deltaTime;
+  m_rotation += turn_input * k_turn_speed * p_deltaTime;
 
   m_position.x += std::cos(m_rotation) * m_speed * p_deltaTime;
   m_position.y += std::sin(m_rotation) * m_speed * p_deltaTime;
 
-  m_energy -= std::abs(m_speed) * energy_cost_per_pixel * p_deltaTime;
+  m_energy -= std::abs(m_speed) * k_energy_cost_per_pixel * p_deltaTime;
 }
 
 void Agent::render() {
@@ -145,3 +145,5 @@ float Agent::get_distance_to_border() const {
 
   return std::min(std::min(left, right), std::min(top, bottom));
 }
+
+} // namespace evosim
