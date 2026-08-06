@@ -98,14 +98,15 @@ target_compile_features(rlimgui PUBLIC cxx_std_20)
 add_executable(
     evosim
     src/main.cpp
-    src/app/Application.cpp
-    src/app/Window.cpp
+    src/core/Application.cpp
+    src/core/Window.cpp
+    src/core/Object.cpp
     src/layers/SimulationLayer.cpp
     src/layers/EditorLayer.cpp
     src/simulation/Simulation.cpp
     src/simulation/Agent.cpp
     src/simulation/Food.cpp
-    src/neural/NeuralNetwork.cpp
+    src/simulation/neural/NeuralNetwork.cpp
     src/ui/Theme.cpp
     src/ui/ViewportPanel.cpp
     src/ui/InspectorPanel.cpp
