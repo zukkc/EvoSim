@@ -113,7 +113,6 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
     Simulation &simulation = m_context.simulation;
     Object *found = simulation.find_object_at(mouse_world_position);
     simulation.set_active_object(found);
-    m_context.editor.active_object = found;
   }
   // =======
 }

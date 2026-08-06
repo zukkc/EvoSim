@@ -13,9 +13,10 @@ namespace evosim {
 void InspectorPanel::on_gui_render() {
   ImGui::Begin("Inspector");
 
-  Object *&object = m_context.editor.active_object;
+  Simulation &sim = m_context.simulation;
+  Object *object = sim.get_active_object();
 
-  if (!m_context.simulation.contains_object(object)) {
+  if (!sim.contains_object(object)) {
     object = nullptr;
     ImGui::Text("Inspektor nieaktywny");
   } else {
