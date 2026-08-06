@@ -1,10 +1,8 @@
 #include "Simulation.h"
 #include "Agent.h"
-#include "neural/NeuralNetwork.h"
 #include "raylib.h"
 #include "simulation/Food.h"
 #include <cstddef>
-#include <iostream>
 #include <memory>
 
 namespace evosim {
@@ -20,6 +18,8 @@ Simulation::Simulation() {
     m_food.push_back(create_food({}));
   }
 }
+
+Simulation::~Simulation() = default;
 
 void Simulation::update(float p_dt) {
   std::vector<std::unique_ptr<Agent>> offspring;
@@ -62,6 +62,7 @@ void Simulation::update(float p_dt) {
     return is_food_eaten;
   });
 
+  
   // move offspring from queue to world
   for (auto &child : offspring) {
     m_population.push_back(std::move(child));

@@ -5,11 +5,15 @@
 #include <memory>
 #include <vector>
 
-#include "Food.h"
-#include "neural/NeuralNetwork.h"
+#include "Object2D.h"
+#include "neural/Genome.h"
 
 namespace evosim {
-  
+
+class NeuralNetwork;
+class InspectorVisitor;
+class Food;
+
 struct ClosestFoodData {
   Food *food;
   float direction;
@@ -20,6 +24,7 @@ class Agent : public Object2D {
 public:
   Agent(Vector2 p_position);
   Agent(Vector2 p_position, std::array<float, 12> p_genome);
+  ~Agent();
   void accept_inspector(InspectorVisitor &p_visitor) override;
 
   void update(float p_deltaTime,

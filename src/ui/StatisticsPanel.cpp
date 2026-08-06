@@ -1,6 +1,6 @@
 #include "StatisticsPanel.h"
-#include "raylib.h"
-
+#include "../core/Context.h"
+#include <raylib.h>
 #include <imgui.h>
 #include <rlImGui.h>
 

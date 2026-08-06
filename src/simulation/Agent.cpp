@@ -26,7 +26,7 @@ Agent::Agent(Vector2 p_position, std::array<float, 12> p_genome)
     : Object2D(p_position, 10), 
       m_neural_network(std::make_unique<NeuralNetwork>(p_genome)) {}
 
-
+Agent::~Agent() = default;
 
 void Agent::accept_inspector(InspectorVisitor &p_visitor) {
   p_visitor.inspect(*this);

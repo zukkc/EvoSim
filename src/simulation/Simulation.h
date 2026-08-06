@@ -1,12 +1,17 @@
 #pragma once
-#include "Agent.h"
-#include "Food.h"
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <raylib.h>
 #include <vector>
 
+#include "Object2D.h"
+#include "neural/Genome.h"
+
 namespace evosim {
+
+class Agent;
+class Food;
 
 struct AgentSpawnParams {
   std::optional<Vector2> position;
@@ -21,10 +26,10 @@ struct FoodSpawnParams {
   float initial_energy = 100.0f;
 };
 
-
 class Simulation {
 public:
   Simulation();
+  ~Simulation();
   void update(float p_dt);
   void render();
 

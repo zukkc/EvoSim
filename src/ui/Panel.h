@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../core/Context.h"
-
 namespace evosim {
+  
+struct AppContext;
 
 class Panel {
 public:

@@ -1,8 +1,10 @@
 #include "ViewportPanel.h"
 #include "raylib.h"
 #include "simulation/Agent.h"
+#include "../core/Context.h"
 
 #include <algorithm>
+#include <cmath>
 #include <imgui.h>
 #include <rlImGui.h>
 

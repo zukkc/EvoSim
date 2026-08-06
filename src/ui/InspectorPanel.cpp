@@ -1,5 +1,10 @@
 #include "InspectorPanel.h"
-
+#include "../core/Context.h"
+#include "../simulation/Agent.h"
+#include "../simulation/Food.h"
+#include "../simulation/neural/Genome.h"
+#include <array>
+#include <cstddef>
 #include <imgui.h>
 #include <rlImGui.h>
 
