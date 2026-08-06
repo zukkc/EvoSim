@@ -2,7 +2,9 @@
 #include "Agent.h"
 #include "neural/NeuralNetwork.h"
 #include "raylib.h"
+#include "simulation/Food.h"
 #include <cstddef>
+#include <iostream>
 #include <memory>
 
 namespace evosim {
@@ -32,9 +34,9 @@ void Simulation::update(float p_dt) {
 
     if (agent->get_energy() > agent->get_reproduce_threshold() &&
         agent->get_reproduction_cooldown() <= 0) {
-      Genome gens = agent->repruduce();
       offspring.push_back(
-          create_agent({.position = agent->get_position(), .genome = gens}));
+          create_agent({.position = agent->get_transform().position,
+                        .genome = agent->repruduce()}));
     }
   }
 
@@ -43,14 +45,12 @@ void Simulation::update(float p_dt) {
     if (agent == nullptr)
       return true;
 
-    const bool is_agent_died = agent->is_dead();
     // if agent just die and he is active in inspector then clear him out from
     // inspector
-    if (is_agent_died && m_active_in_ispector != nullptr &&
-        agent->get_id() == m_active_in_ispector->get_id()) {
-      m_active_in_ispector = nullptr;
+    if (agent->is_dead() && agent->is_active()) {
+      m_active_object_id.reset();
     }
-    return is_agent_died;
+    return agent->is_dead();
   });
 
   // erese eaten food
@@ -91,49 +91,111 @@ void Simulation::render() {
   }
 }
 
-Agent *Simulation::find_agent_at(Vector2 world_position) {
+Object *Simulation::find_object_at(Vector2 world_position) {
   for (auto &agent : m_population) {
     if (is_point_inside_agent(world_position, *agent)) {
       return agent.get();
     }
   }
 
+  for (auto &food : m_food) {
+    if (is_point_inside_agent(world_position, *food)) {
+      return food.get();
+    }
+  }
+
   return nullptr;
 }
 
-void Simulation::set_active_in_inspector(Agent *p_agent) {
-  if (m_active_in_ispector != nullptr && p_agent != nullptr) {
-    m_active_in_ispector->set_active(false);
+bool Simulation::contains_object(const Object *object) const {
+  if (object == nullptr) {
+    return false;
   }
-  if (p_agent != nullptr) {
-    p_agent->set_active(true);
-    m_active_in_ispector = p_agent;
+
+  for (const auto &agent : m_population) {
+    if (agent.get() == object) {
+      return true;
+    }
   }
+
+  for (const auto &food : m_food) {
+    if (food.get() == object) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void Simulation::set_active_object(Object *p_object) {
+  // set old active object to "not active"
+  Object *old_object = get_active_object();
+  if (old_object) {
+    old_object->set_is_active(false);
+  }
+  m_active_object_id.reset();
+
+  // set new object to be active
+  if (p_object == nullptr) {
+    return;
+  }
+  p_object->set_is_active(true);
+  m_active_object_id = p_object->get_id();
+}
+
+Object *Simulation::get_active_object() {
+  if (!m_active_object_id) {
+    return nullptr;
+  }
+
+  Object *object = get_object_by_id(*m_active_object_id);
+
+  if (object == nullptr) {
+    m_active_object_id.reset();
+  }
+
+  return object;
+}
+
+Object *Simulation::get_object_by_id(Object::ID p_id) {
+  for (auto &agent : m_population) {
+    if (agent && agent->get_id() == p_id) {
+      return agent.get();
+    }
+  }
+
+  for (auto &food : m_food) {
+    if (food && food->get_id() == p_id) {
+      return food.get();
+    }
+  }
+
+  return nullptr;
 }
 
 size_t Simulation::get_agent_count() { return m_population.size(); }
-Agent *Simulation::get_active_in_inspector() { return m_active_in_ispector; }
 
 /////////////////////////////////////
 
 std::unique_ptr<Agent> Simulation::create_agent(AgentSpawnParams p_params) {
   Vector2 position =
       p_params.position ? *p_params.position : get_random_world_position();
-  return std::make_unique<Agent>(m_reserved_ids++, position);
+  return std::make_unique<Agent>(position);
 }
 
 std::unique_ptr<Food> Simulation::create_food(FoodSpawnParams p_params) {
   Vector2 position =
       p_params.position ? *p_params.position : get_random_world_position();
-  return std::make_unique<Food>(m_reserved_ids++, position);
+  return std::make_unique<Food>(position);
 }
 
-bool Simulation::is_point_inside_agent(Vector2 point, const Agent &agent) {
-  const float dx = point.x - agent.get_position().x;
-  const float dy = point.y - agent.get_position().y;
+bool Simulation::is_point_inside_agent(Vector2 p_point,
+                                       const Object2D &p_object) {
+  const float dx = p_point.x - p_object.get_transform().position.x;
+  const float dy = p_point.y - p_object.get_transform().position.y;
 
   const float distance_squared = dx * dx + dy * dy;
-  const float radius = agent.get_radius();
+  const float radius = p_object.get_transform().radius;
 
   return distance_squared <= radius * radius;
 }

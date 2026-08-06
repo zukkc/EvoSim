@@ -13,21 +13,14 @@ struct AgentSpawnParams {
   std::optional<Genome> genome;
 
   float initial_energy = 100.0f;
-  int id = 0;
 };
 
 struct FoodSpawnParams {
   std::optional<Vector2> position;
 
   float initial_energy = 100.0f;
-  int id = 1;
 };
 
-struct Transform {
-  Vector2 position{};
-  float rotation = 0.0f;
-  Vector2 scale{1.0f, 1.0f};
-};
 
 class Simulation {
 public:
@@ -35,20 +28,21 @@ public:
   void update(float p_dt);
   void render();
 
-  Agent *find_agent_at(Vector2 world_position);
-  void set_active_in_inspector(Agent *p_agent);
+  Object *find_object_at(Vector2 p_world_position);
+  Object *get_object_by_id(Object::ID p_id);
+  bool contains_object(const Object *p_object) const;
+  void set_active_object(Object *p_object);
 
+  Object *get_active_object();
   size_t get_agent_count();
-  Agent *get_active_in_inspector();
 
 private:
   std::vector<std::unique_ptr<Agent>> m_population;
   std::vector<std::unique_ptr<Food>> m_food;
-  Agent *m_active_in_ispector = nullptr;
-  int m_reserved_ids = 0;
+  std::optional<Object::ID> m_active_object_id;
   int m_spawn_distance = 1000;
 
-  bool is_point_inside_agent(Vector2 p_point, const Agent &p_agent);
+  bool is_point_inside_agent(Vector2 p_point, const Object2D &p_object);
   std::unique_ptr<Agent> create_agent(AgentSpawnParams p_params);
   std::unique_ptr<Food> create_food(FoodSpawnParams p_params);
   Vector2 get_random_world_position();

@@ -1,6 +1,7 @@
 #include "Agent.h"
 #include "Food.h"
 #include "neural/NeuralNetwork.h"
+#include "../ui/InspectorVisitor.h"
 
 #include <algorithm>
 #include <array>
@@ -17,17 +18,19 @@ constexpr float k_max_speed = 100.0F;
 constexpr float k_turn_speed = 2.0F;
 constexpr float k_energy_cost_per_pixel = 0.001F;
 
-Agent::Agent(int p_id, Vector2 p_position)
-    : m_id(p_id), m_position(p_position) {
-  m_neural_network = new NeuralNetwork();
-}
+Agent::Agent(Vector2 p_position)
+    : Object2D(p_position, 10), 
+      m_neural_network(std::make_unique<NeuralNetwork>()) {}
 
-Agent::Agent(int p_id, Vector2 p_position, std::array<float, 12> p_genome)
-    : m_id(p_id), m_position(p_position) {
-  m_neural_network = new NeuralNetwork(p_genome);
-}
+Agent::Agent(Vector2 p_position, std::array<float, 12> p_genome)
+    : Object2D(p_position, 10), 
+      m_neural_network(std::make_unique<NeuralNetwork>(p_genome)) {}
 
-Agent::~Agent() { delete m_neural_network; }
+
+
+void Agent::accept_inspector(InspectorVisitor &p_visitor) {
+  p_visitor.inspect(*this);
+}
 
 void Agent::update(float p_deltaTime,
                    const std::vector<std::unique_ptr<Food>> &p_all_food) {
@@ -59,26 +62,26 @@ void Agent::update(float p_deltaTime,
 
   const float turn_input = outputs[1];
 
-  m_rotation += turn_input * k_turn_speed * p_deltaTime;
+  m_transform.rotation += turn_input * k_turn_speed * p_deltaTime;
 
-  m_position.x += std::cos(m_rotation) * m_speed * p_deltaTime;
-  m_position.y += std::sin(m_rotation) * m_speed * p_deltaTime;
+  m_transform.position.x += std::cos(m_transform.rotation) * m_speed * p_deltaTime;
+  m_transform.position.y += std::sin(m_transform.rotation) * m_speed * p_deltaTime;
 
   m_energy -= std::abs(m_speed) * k_energy_cost_per_pixel * p_deltaTime;
 }
 
 void Agent::render() {
-  if (m_is_active) {
-    DrawCircleV(m_position, m_radius + 1, GREEN);
-    DrawRectangleV({m_position.x - 21.0F, m_position.y - 21.0F}, {42.0F, 7.0F},
+  if (is_active()) {
+    DrawCircleV(m_transform.position, m_transform.radius + 1, GREEN);
+    DrawRectangleV({m_transform.position.x - 21.0F, m_transform.position.y - 21.0F}, {42.0F, 7.0F},
                    GREEN);
   }
-  DrawCircleV(m_position, m_radius, WHITE);
+  DrawCircleV(m_transform.position, m_transform.radius, WHITE);
 
-  DrawRectangleV({m_position.x - 20.0F, m_position.y - 20.0F}, {40.0F, 5.0F},
+  DrawRectangleV({m_transform.position.x - 20.0F, m_transform.position.y - 20.0F}, {40.0F, 5.0F},
                  GRAY);
 
-  DrawRectangleV({m_position.x - 20.0F, m_position.y - 20.0F},
+  DrawRectangleV({m_transform.position.x - 20.0F, m_transform.position.y - 20.0F},
                  {40.0F * std::clamp(m_energy, 0.0F, 1.0F), 5.0F}, RED);
 }
 
@@ -87,9 +90,6 @@ Genome Agent::repruduce() {
   return m_neural_network->mutate();
 }
 
-void Agent::set_active(bool p_active) { m_is_active = p_active; }
-
-int Agent::get_id() const { return 777; }
 bool Agent::is_dead() const { return m_energy <= 0; }
 float Agent::get_energy() const { return m_energy; }
 const Genome &Agent::get_genome() const {
@@ -101,8 +101,6 @@ float Agent::get_reproduce_threshold() const {
 float Agent::get_reproduction_cooldown() const {
   return m_reproduction_cooldown;
 }
-Vector2 Agent::get_position() const { return m_position; }
-float Agent::get_radius() const { return m_radius; }
 
 // ================================================= //
 
@@ -117,9 +115,9 @@ Agent::find_closest(const std::vector<std::unique_ptr<Food>> &p_all_food) {
       continue;
     }
 
-    const Vector2 pos = food->get_position();
-    const float dx = static_cast<float>(pos.x) - m_position.x;
-    const float dy = static_cast<float>(pos.y) - m_position.y;
+    const Vector2 &pos = food->get_transform().position;
+    const float dx = static_cast<float>(pos.x) - m_transform.position.x;
+    const float dy = static_cast<float>(pos.y) - m_transform.position.y;
 
     const float distance_squared = dx * dx + dy * dy;
 
@@ -129,8 +127,8 @@ Agent::find_closest(const std::vector<std::unique_ptr<Food>> &p_all_food) {
       result.food = food.get();
       result.distance = std::sqrt(distance_squared);
       const float target_direction = std::atan2(dy, dx);
-      result.direction = std::atan2(std::sin(target_direction - m_rotation),
-                                    std::cos(target_direction - m_rotation));
+      result.direction = std::atan2(std::sin(target_direction - m_transform.rotation),
+                                    std::cos(target_direction - m_transform.rotation));
     }
   }
 
@@ -138,10 +136,10 @@ Agent::find_closest(const std::vector<std::unique_ptr<Food>> &p_all_food) {
 }
 
 float Agent::get_distance_to_border() const {
-  const float left = m_position.x;
-  const float right = static_cast<float>(GetScreenWidth()) - m_position.x;
-  const float top = m_position.y;
-  const float bottom = static_cast<float>(GetScreenHeight()) - m_position.y;
+  const float left = m_transform.position.x;
+  const float right = static_cast<float>(GetScreenWidth()) - m_transform.position.x;
+  const float top = m_transform.position.y;
+  const float bottom = static_cast<float>(GetScreenHeight()) - m_transform.position.y;
 
   return std::min(std::min(left, right), std::min(top, bottom));
 }

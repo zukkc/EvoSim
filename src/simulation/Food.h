@@ -1,24 +1,22 @@
 #pragma once
 #include <raylib.h>
 
+#include "Object2D.h"
+
 namespace evosim {
 
-class Food {
+class Food : public Object2D {
 public:
-  Food(int p_id, Vector2 p_position);
+  Food(Vector2 p_position);
+  void accept_inspector(InspectorVisitor &p_visitor) override;
   void render();
 
   float consume();
-  void set_position(Vector2 p_position);
   void set_energy(float p_energy);
 
-  int get_id() const;
-  Vector2 get_position() const;
   bool is_consumed() const;
 
 private:
-  int m_id;
-  Vector2 m_position;
   float m_energy = 0.50F;
 };
 
