@@ -5,34 +5,51 @@
 
 namespace evosim {
 
-void InspectorPanel::on_update(float) {
-  m_active = m_context.simulation.get_active_in_inspector();
-}
-
 void InspectorPanel::on_gui_render() {
   ImGui::Begin("Inspector");
 
-  if (m_active == nullptr || m_active->is_dead()) {
-    ImGui::Text("There is no active Agent");
+  Object *&object = m_context.editor.active_object;
+
+  if (!m_context.simulation.contains_object(object)) {
+    object = nullptr;
+    ImGui::Text("Inspektor nieaktywny");
   } else {
-    ImGui::Text("Agent ID: %i", m_active->get_id());
-    ImGui::Text("Energy: %f", m_active->get_energy());
-    ImGui::Text("Agent ID: x=%f, y=%f", m_active->get_position().x,
-                m_active->get_position().y);
-    ImGui::Text("Reproduction treshold of energy: %f",
-                m_active->get_reproduce_threshold());
-    ImGui::Text("Reproduction cooldown remening: %f",
-                m_active->get_reproduction_cooldown());
-    ImGui::BeginGroup();
-    draw_genome_table();
-    ImGui::EndGroup();
+    object->accept_inspector(*this);
   }
 
   ImGui::End();
 }
 
-void InspectorPanel::draw_genome_table() {
-  const Genome &genome = m_active->get_genome();
+void InspectorPanel::inspect(Agent &p_agent) {
+
+  if (p_agent.is_dead()) {
+    ImGui::Text("Agent died");
+  } else {
+    ImGui::Text("Agent ID: %lu", p_agent.get_id());
+    ImGui::Text("Energy: %f", p_agent.get_energy());
+    ImGui::Text("Agent ID: x=%f, y=%f", p_agent.get_transform().position.x,
+                p_agent.get_transform().position.y);
+    ImGui::Text("Reproduction treshold of energy: %f",
+                p_agent.get_reproduce_threshold());
+    ImGui::Text("Reproduction cooldown remening: %f",
+                p_agent.get_reproduction_cooldown());
+    ImGui::BeginGroup();
+    draw_genome_table(p_agent);
+    ImGui::EndGroup();
+  }
+}
+
+void InspectorPanel::inspect(Food &p_food) {
+
+  if (p_food.is_consumed()) {
+    ImGui::Text("Food eaten");
+  } else {
+    ImGui::Text("Food ID: %lu", p_food.get_id());
+  }
+}
+
+void InspectorPanel::draw_genome_table(Agent &p_agent) {
+  const Genome &genome = p_agent.get_genome();
 
   constexpr std::array input_names{
       "Direction to food",
@@ -79,5 +96,4 @@ void InspectorPanel::draw_genome_table() {
     ImGui::EndTable();
   }
 }
-
 } // namespace evosim

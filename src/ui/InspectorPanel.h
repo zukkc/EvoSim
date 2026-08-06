@@ -1,17 +1,18 @@
+#include "InspectorVisitor.h"
 #include "Panel.h"
 
 namespace evosim {
 
-class InspectorPanel : public Panel {
+class InspectorPanel : public Panel, public InspectorVisitor {
 public:
   using Panel::Panel;
-  void on_update(float) override;
   void on_gui_render() override;
 
-private:
-  Agent *m_active = nullptr;
+  void inspect(Agent &p_agent) override;
+  void inspect(Food &p_food) override;
 
-  void draw_genome_table();
+private:
+  void draw_genome_table(Agent &p_agent);
 };
 
 } // namespace evosim

@@ -1,11 +1,9 @@
 #include "ViewportPanel.h"
-#include "app/Context.h"
 #include "raylib.h"
 #include "simulation/Agent.h"
 
 #include <algorithm>
 #include <imgui.h>
-#include <iostream>
 #include <rlImGui.h>
 
 namespace evosim {
@@ -111,10 +109,9 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
   // CLICKING
   if (p_is_viewport_hovered && ImGui::IsMouseClicked(click_button)) {
     Simulation &simulation = m_context.simulation;
-    Agent *found = simulation.find_agent_at(mouse_world_position);
-    if (found == nullptr)
-      return;
-    simulation.set_active_in_inspector(found);
+    Object *found = simulation.find_object_at(mouse_world_position);
+    simulation.set_active_object(found);
+    m_context.editor.active_object = found;
   }
   // =======
 }
