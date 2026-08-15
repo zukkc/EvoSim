@@ -29,11 +29,9 @@ struct FoodSpawnParams {
 class Simulation {
 public:
   enum Speed {
-    FAST_X2,
-    FAST_X1,
+    SLOWER,
     NORMAL,
-    SLOW_X1,
-    SLOW_X2,
+    FASTER,
   };
 
 public:
@@ -45,7 +43,7 @@ public:
   void start_simulation();
   void end_simulation();
   void set_simulation_speed(Speed p_speed);
-  const Speed &get_simulation_speed() const;
+  float get_simulation_speed() const;
   Object *find_object_at(Vector2 p_world_position);
   Object *get_object_by_id(Object::ID p_id);
   bool contains_object(const Object *p_object) const;
@@ -61,7 +59,7 @@ private:
   std::optional<Object::ID> m_active_object_id;
   int m_spawn_distance = 1000;
   bool m_running = false;
-  Speed m_speed = Speed::NORMAL;
+  float m_speed = 1;
 
   bool is_point_inside_agent(Vector2 p_point, const Object2D &p_object);
   std::unique_ptr<Agent> create_agent(AgentSpawnParams p_params);

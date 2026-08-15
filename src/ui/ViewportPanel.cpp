@@ -51,9 +51,12 @@ void ViewportPanel::on_gui_render() {
   ImGui::PopStyleVar();
 }
 
-void ViewportPanel::handle_input(bool p_is_viewport_hovered, const ImVec2 &p_image_min, const ImVec2 &p_image_size) {
+void ViewportPanel::handle_input(bool p_is_viewport_hovered,
+                                 const ImVec2 &p_image_min,
+                                 const ImVec2 &p_image_size) {
 
-  if (!p_is_viewport_hovered || p_image_size.x <= 0.0f || p_image_size.y <= 0.0f) {
+  if (!p_is_viewport_hovered || p_image_size.x <= 0.0f ||
+      p_image_size.y <= 0.0f) {
     return;
   }
 
@@ -130,12 +133,16 @@ bool ViewportPanel::draw_viewport_controls(const ImVec2 &image_min,
   Simulation &sim = m_context.simulation;
   const float button_size = 32.0f;
   const float spacing = 4.0f;
+  const float large_spacing = 20.0f;
   const float padding = 6.0f;
 
-  constexpr int button_count = 5;
+  constexpr int button_count = 6;
+  constexpr int normal_spacing_count = button_count - 2;
 
   const float controls_width = button_count * button_size +
-                               (button_count - 1) * spacing + padding * 2.0f;
+                               normal_spacing_count * spacing + large_spacing +
+                               padding * 2.0f;
+  ;
 
   const float controls_height = button_size + padding * 2.0f;
 
@@ -155,41 +162,47 @@ bool ViewportPanel::draw_viewport_controls(const ImVec2 &image_min,
   ImGui::BeginChild("ViewportControls", ImVec2{controls_width, controls_height},
                     true, ImGuiWindowFlags_NoScrollbar);
 
-  ImGui::SetCursorPos(ImVec2{padding, padding});
+  ImGui::SetCursorPos({padding, padding});
 
-  if (ImGui::Button(ICON_FA_ANGLES_LEFT, ImVec2{button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::SLOW_X2);
+  ImGui::BeginDisabled(sim.is_running());
+  if (ImGui::Button(ICON_FA_PLAY, {button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::NORMAL);
+    sim.start_simulation();
+  }
+  ImGui::EndDisabled();
+
+  ImGui::SameLine(0.0f, spacing);
+
+  ImGui::BeginDisabled(!sim.is_running());
+  if (ImGui::Button(ICON_FA_PAUSE, {button_size, button_size})) {
+    sim.end_simulation();
+  }
+  ImGui::EndDisabled();
+
+  ImGui::SameLine(0.0f, spacing);
+
+  ImGui::BeginDisabled();
+  if (ImGui::Button(ICON_FA_STOP, {button_size, button_size})) {
+    sim.end_simulation();
+  }
+  ImGui::EndDisabled();
+
+  ImGui::SameLine(0.0f, large_spacing);
+
+  if (ImGui::Button(ICON_FA_ANGLES_LEFT, {button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::SLOWER);
   }
 
   ImGui::SameLine(0.0f, spacing);
 
-  if (ImGui::Button(ICON_FA_ANGLE_LEFT, ImVec2{button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::SLOW_X1);
+  if (ImGui::Button(ICON_FA_ANGLE_RIGHT, {button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::NORMAL);
   }
 
   ImGui::SameLine(0.0f, spacing);
 
-  if (sim.is_running()) {
-    if (ImGui::Button(ICON_FA_PAUSE, ImVec2{button_size, button_size})) {
-      sim.end_simulation();
-    }
-  } else {
-    if (ImGui::Button(ICON_FA_PLAY, ImVec2{button_size, button_size})) {
-      sim.set_simulation_speed(Simulation::Speed::NORMAL);
-      sim.start_simulation();
-    }
-  }
-
-  ImGui::SameLine(0.0f, spacing);
-
-  if (ImGui::Button(ICON_FA_ANGLE_RIGHT, ImVec2{button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::FAST_X1);
-  }
-
-  ImGui::SameLine(0.0f, spacing);
-
-  if (ImGui::Button(ICON_FA_ANGLES_RIGHT, ImVec2{button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::FAST_X2);
+  if (ImGui::Button(ICON_FA_ANGLES_RIGHT, {button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::FASTER);
   }
 
   const bool hovered =
