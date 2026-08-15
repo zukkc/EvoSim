@@ -2,7 +2,15 @@
 
 #include "./simulation/Simulation.h"
 
+
+struct ImFont;
+
 namespace evosim {
+
+struct UIContext {
+  ImFont *font_regular = nullptr;
+  ImFont *font_bold = nullptr;
+};
 
 struct ViewportContext {
   RenderTexture2D render_texture{};
@@ -17,8 +25,9 @@ struct ViewportContext {
 };
 
 struct AppContext {
+  UIContext ui;
   Simulation simulation;
   ViewportContext viewport;
 };
 
-}
+} // namespace evosim

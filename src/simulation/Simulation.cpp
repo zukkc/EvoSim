@@ -6,6 +6,18 @@
 #include <memory>
 
 namespace evosim {
+  
+  constexpr float get_speed_multiplier(Simulation::Speed p_speed) {
+    switch (p_speed) {
+      case Simulation::Speed::FAST_X2: return 2.0f;
+      case Simulation::Speed::FAST_X1: return 1.0f;
+      case Simulation::Speed::NORMAL : return 1.0f;
+      case Simulation::Speed::SLOW_X1: return 0.5f;
+      case Simulation::Speed::SLOW_X2: return 0.25f;
+    }
+
+    return 1.0f;
+}
 
 Simulation::Simulation() {
   m_population.reserve(20);
@@ -22,6 +34,11 @@ Simulation::Simulation() {
 Simulation::~Simulation() = default;
 
 void Simulation::update(float p_dt) {
+  if (!m_running)
+    return;
+  
+  float delta_time = p_dt * get_speed_multiplier(m_speed);
+  TraceLog(LOG_INFO, "%f", get_speed_multiplier(m_speed));
   std::vector<std::unique_ptr<Agent>> offspring;
   std::vector<std::unique_ptr<Food>> new_food;
 
@@ -30,7 +47,7 @@ void Simulation::update(float p_dt) {
       continue;
     }
 
-    agent->update(p_dt, m_food);
+    agent->update(delta_time, m_food);
 
     if (agent->get_energy() > agent->get_reproduce_threshold() &&
         agent->get_reproduction_cooldown() <= 0) {
@@ -62,7 +79,6 @@ void Simulation::update(float p_dt) {
     return is_food_eaten;
   });
 
-  
   // move offspring from queue to world
   for (auto &child : offspring) {
     m_population.push_back(std::move(child));
@@ -90,6 +106,18 @@ void Simulation::render() {
 
     food->render();
   }
+}
+
+void Simulation::start_simulation() { m_running = true; }
+
+void Simulation::end_simulation() { m_running = false; }
+
+void Simulation::set_simulation_speed(Speed p_speed) {
+  m_speed = p_speed; 
+}
+
+const Simulation::Speed &Simulation::get_simulation_speed() const {
+  return m_speed;
 }
 
 Object *Simulation::find_object_at(Vector2 world_position) {
@@ -174,6 +202,7 @@ Object *Simulation::get_object_by_id(Object::ID p_id) {
   return nullptr;
 }
 
+bool Simulation::is_running() const { return m_running; }
 size_t Simulation::get_agent_count() { return m_population.size(); }
 
 /////////////////////////////////////

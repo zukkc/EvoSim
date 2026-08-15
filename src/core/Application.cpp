@@ -5,8 +5,8 @@
 
 #include "../ui/Theme.h"
 #include "layers/EditorLayer.h"
-#include "layers/SimulationLayer.h"
 #include "layers/Layer.h"
+#include "layers/SimulationLayer.h"
 
 namespace evosim {
 
@@ -23,12 +23,20 @@ void Application::setup() {
 
   m_window.init(k_screen_width, k_screen_height, k_app_name);
 
-  rlImGuiSetup(true);
+  rlImGuiBeginInitImGui();
 
+  ImGui::StyleColorsDark();
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  io.Fonts->AddFontFromFileTTF(
+  m_context.ui.font_bold = io.Fonts->AddFontFromFileTTF(
+      "assets/fonts/Inter/static/Inter_18pt-Bold.ttf", 17.0f);
+  // main font must be addad in the end in order to rlimgui marged
+  // FontAwsomeIcons to it
+  m_context.ui.font_regular = io.Fonts->AddFontFromFileTTF(
       "assets/fonts/Inter/static/Inter_18pt-Regular.ttf", 17.0f);
+  io.FontDefault = m_context.ui.font_regular;
+
+  rlImGuiEndInitImGui();
 
   // apply custom theme
   apply_evosim_theme();

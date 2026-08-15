@@ -1,11 +1,12 @@
 #include "ViewportPanel.h"
-#include "raylib.h"
-#include "simulation/Agent.h"
 #include "../core/Context.h"
+#include "extras/IconsFontAwesome6.h"
+#include "imgui.h"
+#include "raylib.h"
+#include "simulation/Simulation.h"
 
 #include <algorithm>
 #include <cmath>
-#include <imgui.h>
 #include <rlImGui.h>
 
 namespace evosim {
@@ -34,18 +35,25 @@ void ViewportPanel::on_gui_render() {
     rlImGuiImageRect(&viewport.render_texture.texture, viewport.width,
                      viewport.height, source);
 
-    handle_input(ImGui::IsItemHovered());
+    const ImVec2 image_min = ImGui::GetItemRectMin();
+    const ImVec2 image_max = ImGui::GetItemRectMax();
+    const ImVec2 image_size = ImGui::GetItemRectSize();
+
+    const bool viewport_hovered = ImGui::IsItemHovered();
+    const bool controls_hovered = draw_viewport_controls(image_min, image_max);
+
+    if (viewport_hovered && !controls_hovered) {
+      handle_input(true, image_min, image_size);
+    };
   }
 
   ImGui::End();
   ImGui::PopStyleVar();
 }
 
-void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
-  const ImVec2 image_min = ImGui::GetItemRectMin();
-  const ImVec2 image_size = ImGui::GetItemRectSize();
+void ViewportPanel::handle_input(bool p_is_viewport_hovered, const ImVec2 &p_image_min, const ImVec2 &p_image_size) {
 
-  if (!p_is_viewport_hovered || image_size.x <= 0.0f || image_size.y <= 0.0f) {
+  if (!p_is_viewport_hovered || p_image_size.x <= 0.0f || p_image_size.y <= 0.0f) {
     return;
   }
 
@@ -57,15 +65,15 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
   const ImVec2 mouse = ImGui::GetIO().MousePos;
   const float wheel = ImGui::GetIO().MouseWheel;
 
-  const float local_x = mouse.x - image_min.x;
-  const float local_y = mouse.y - image_min.y;
+  const float local_x = mouse.x - p_image_min.x;
+  const float local_y = mouse.y - p_image_min.y;
 
   const Vector2 texture_mouse_position{
       local_x * static_cast<float>(viewport.render_texture.texture.width) /
-          image_size.x,
+          p_image_size.x,
 
       local_y * static_cast<float>(viewport.render_texture.texture.height) /
-          image_size.y};
+          p_image_size.y};
 
   Vector2 mouse_world_position =
       GetScreenToWorld2D(texture_mouse_position, camera);
@@ -115,6 +123,84 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered) {
     simulation.set_active_object(found);
   }
   // =======
+}
+
+bool ViewportPanel::draw_viewport_controls(const ImVec2 &image_min,
+                                           const ImVec2 &image_max) {
+  Simulation &sim = m_context.simulation;
+  const float button_size = 32.0f;
+  const float spacing = 4.0f;
+  const float padding = 6.0f;
+
+  constexpr int button_count = 5;
+
+  const float controls_width = button_count * button_size +
+                               (button_count - 1) * spacing + padding * 2.0f;
+
+  const float controls_height = button_size + padding * 2.0f;
+
+  const float image_center_x = (image_min.x + image_max.x) * 0.5f;
+
+  const ImVec2 controls_position{image_center_x - controls_width * 0.5f,
+                                 image_min.y + 10.0f};
+
+  ImGui::SetCursorScreenPos(controls_position);
+
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4{0.08f, 0.08f, 0.08f, 0.85f});
+
+  ImGui::BeginChild("ViewportControls", ImVec2{controls_width, controls_height},
+                    true, ImGuiWindowFlags_NoScrollbar);
+
+  ImGui::SetCursorPos(ImVec2{padding, padding});
+
+  if (ImGui::Button(ICON_FA_ANGLES_LEFT, ImVec2{button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::SLOW_X2);
+  }
+
+  ImGui::SameLine(0.0f, spacing);
+
+  if (ImGui::Button(ICON_FA_ANGLE_LEFT, ImVec2{button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::SLOW_X1);
+  }
+
+  ImGui::SameLine(0.0f, spacing);
+
+  if (sim.is_running()) {
+    if (ImGui::Button(ICON_FA_PAUSE, ImVec2{button_size, button_size})) {
+      sim.end_simulation();
+    }
+  } else {
+    if (ImGui::Button(ICON_FA_PLAY, ImVec2{button_size, button_size})) {
+      sim.set_simulation_speed(Simulation::Speed::NORMAL);
+      sim.start_simulation();
+    }
+  }
+
+  ImGui::SameLine(0.0f, spacing);
+
+  if (ImGui::Button(ICON_FA_ANGLE_RIGHT, ImVec2{button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::FAST_X1);
+  }
+
+  ImGui::SameLine(0.0f, spacing);
+
+  if (ImGui::Button(ICON_FA_ANGLES_RIGHT, ImVec2{button_size, button_size})) {
+    sim.set_simulation_speed(Simulation::Speed::FAST_X2);
+  }
+
+  const bool hovered =
+      ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+  ImGui::EndChild();
+
+  ImGui::PopStyleColor();
+  ImGui::PopStyleVar(2);
+
+  return hovered;
 }
 
 } // namespace evosim
