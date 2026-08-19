@@ -26,7 +26,6 @@ void Simulation::update(float p_dt) {
     return;
 
   float delta_time = p_dt * m_speed;
-  TraceLog(LOG_INFO, "%f", m_speed);
   std::vector<std::unique_ptr<Agent>> offspring;
   std::vector<std::unique_ptr<Food>> new_food;
 
@@ -46,15 +45,10 @@ void Simulation::update(float p_dt) {
   }
 
   // erese dead agents
-  std::erase_if(m_population, [this](const std::unique_ptr<Agent> &agent) {
+  std::erase_if(m_population, [](const std::unique_ptr<Agent> &agent) {
     if (agent == nullptr)
       return true;
 
-    // if agent just die and he is active in inspector then clear him out from
-    // inspector
-    if (agent->is_dead() && agent->is_active()) {
-      m_active_object_id.reset();
-    }
     return agent->is_dead();
   });
 
@@ -78,7 +72,7 @@ void Simulation::update(float p_dt) {
   }
 }
 
-void Simulation::render() {
+void Simulation::render() const {
   for (const auto &agent : m_population) {
     if (agent == nullptr) {
       continue;
@@ -120,7 +114,7 @@ void Simulation::set_simulation_speed(Speed p_speed) {
 
 float Simulation::get_simulation_speed() const { return m_speed; }
 
-Object *Simulation::find_object_at(Vector2 world_position) {
+WorldObject *Simulation::find_object_at(Vector2 world_position) {
   for (auto &agent : m_population) {
     if (is_point_inside_agent(world_position, *agent)) {
       return agent.get();
@@ -136,57 +130,7 @@ Object *Simulation::find_object_at(Vector2 world_position) {
   return nullptr;
 }
 
-bool Simulation::contains_object(const Object *object) const {
-  if (object == nullptr) {
-    return false;
-  }
-
-  for (const auto &agent : m_population) {
-    if (agent.get() == object) {
-      return true;
-    }
-  }
-
-  for (const auto &food : m_food) {
-    if (food.get() == object) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-void Simulation::set_active_object(Object *p_object) {
-  // set old active object to "not active"
-  Object *old_object = get_active_object();
-  if (old_object) {
-    old_object->set_is_active(false);
-  }
-  m_active_object_id.reset();
-
-  // set new object to be active
-  if (p_object == nullptr) {
-    return;
-  }
-  p_object->set_is_active(true);
-  m_active_object_id = p_object->get_id();
-}
-
-Object *Simulation::get_active_object() {
-  if (!m_active_object_id) {
-    return nullptr;
-  }
-
-  Object *object = get_object_by_id(*m_active_object_id);
-
-  if (object == nullptr) {
-    m_active_object_id.reset();
-  }
-
-  return object;
-}
-
-Object *Simulation::get_object_by_id(Object::ID p_id) {
+WorldObject *Simulation::get_object_by_id(Object::ID p_id) {
   for (auto &agent : m_population) {
     if (agent && agent->get_id() == p_id) {
       return agent.get();

@@ -106,11 +106,15 @@ add_executable(
     src/simulation/Simulation.cpp
     src/simulation/Agent.cpp
     src/simulation/Food.cpp
-    src/simulation/neural/NeuralNetwork.cpp
+    src/neuralnetwork/NeuralNetwork.cpp
+    src/neuralnetwork/NetworkGraph.cpp
     src/ui/Theme.cpp
     src/ui/ViewportPanel.cpp
     src/ui/InspectorPanel.cpp
     src/ui/StatisticsPanel.cpp
+    src/ui/networkpanel/NetworkPanel.cpp
+    src/ui/networkpanel/Node.cpp
+    src/ui/networkpanel/InputNode.cpp
 )
 
 target_include_directories(

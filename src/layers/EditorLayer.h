@@ -12,6 +12,8 @@ public:
   explicit EditorLayer(AppContext &context);
   void on_update(float p_dt) override;
   void on_gui_render() override;
+  
+  void add_panel(std::unique_ptr<Panel> p_panel);
 
 private:
   AppContext &m_context;

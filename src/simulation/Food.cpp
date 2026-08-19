@@ -11,9 +11,9 @@ void Food::accept_inspector(InspectorVisitor &p_visitor) {
   p_visitor.inspect(*this);
 }
 
-void Food::render() {
-  DrawCircle((int)m_transform.position.x, (int)m_transform.position.y, m_transform.radius,
-             BLUE);
+void Food::render() const {
+  DrawCircle((int)m_transform.position.x, (int)m_transform.position.y,
+             m_transform.radius, BLUE);
 }
 
 float Food::consume() {

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Object2D.h"
-#include "neural/Genome.h"
+#include "neuralnetwork/Genome.h"
 
 namespace evosim {
 
@@ -29,7 +29,7 @@ public:
 
   void update(float p_deltaTime,
               const std::vector<std::unique_ptr<Food>> &p_all_food);
-  void render();
+  void render() const override;
 
   bool is_dead() const;
   float get_energy() const;
@@ -39,7 +39,6 @@ public:
   float get_radius() const;
 
   Genome repruduce();
-  void set_active(bool p_active);
 
 private:
   std::unique_ptr<NeuralNetwork> m_neural_network;

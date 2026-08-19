@@ -123,7 +123,7 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered,
   if (p_is_viewport_hovered && ImGui::IsMouseClicked(click_button)) {
     Simulation &simulation = m_context.simulation;
     Object *found = simulation.find_object_at(mouse_world_position);
-    simulation.set_active_object(found);
+    m_context.selection.select(found);
   }
   // =======
 }

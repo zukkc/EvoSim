@@ -33,6 +33,17 @@ void SimulationLayer::on_render() {
 
   BeginMode2D(m_context.viewport.camera);
   m_context.simulation.render();
+
+  const std::optional<Object::ID> selected_id =
+      m_context.selection.get_selected_id();
+  if (selected_id) {
+    WorldObject *selected_object =
+        m_context.simulation.get_object_by_id(*selected_id);
+    if (selected_object) {
+      selected_object->render_selection_overlay();
+    }
+  }
+
   EndMode2D();
 
   EndTextureMode();

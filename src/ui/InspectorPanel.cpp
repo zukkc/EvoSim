@@ -2,7 +2,8 @@
 #include "../core/Context.h"
 #include "../simulation/Agent.h"
 #include "../simulation/Food.h"
-#include "../simulation/neural/Genome.h"
+#include "neuralnetwork/Genome.h"
+#include "ui/networkpanel/InputNode.h"
 #include <array>
 #include <cstddef>
 #include <imgui.h>
@@ -13,11 +14,9 @@ namespace evosim {
 void InspectorPanel::on_gui_render() {
   ImGui::Begin("Inspector");
 
-  Simulation &sim = m_context.simulation;
-  Object *object = sim.get_active_object();
+  Object *object = m_context.get_selected_object();
 
-  if (!sim.contains_object(object)) {
-    object = nullptr;
+  if (!object) {
     ImGui::Text("Inspektor nieaktywny");
   } else {
     object->accept_inspector(*this);
@@ -52,6 +51,10 @@ void InspectorPanel::inspect(Food &p_food) {
   } else {
     ImGui::Text("Food ID: %lu", p_food.get_id());
   }
+}
+
+void InspectorPanel::inspect(InputNode &p_input_node) {
+  ImGui::Text("nazwa: %s", p_input_node.get_name().c_str());
 }
 
 void InspectorPanel::draw_genome_table(Agent &p_agent) {

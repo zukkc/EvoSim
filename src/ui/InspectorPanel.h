@@ -2,6 +2,8 @@
 #include "Panel.h"
 
 namespace evosim {
+  
+class InputNode;
 
 class InspectorPanel : public Panel, public InspectorVisitor {
 public:
@@ -10,6 +12,7 @@ public:
 
   void inspect(Agent &p_agent) override;
   void inspect(Food &p_food) override;
+  void inspect(InputNode &p_node) override;
 
 private:
   void draw_genome_table(Agent &p_agent);

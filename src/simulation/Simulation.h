@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Object2D.h"
-#include "neural/Genome.h"
+#include "neuralnetwork/Genome.h"
 
 namespace evosim {
 
@@ -38,25 +38,21 @@ public:
   Simulation();
   ~Simulation();
   void update(float p_dt);
-  void render();
+  void render() const;
 
   void start_simulation();
   void end_simulation();
   void set_simulation_speed(Speed p_speed);
   float get_simulation_speed() const;
-  Object *find_object_at(Vector2 p_world_position);
-  Object *get_object_by_id(Object::ID p_id);
-  bool contains_object(const Object *p_object) const;
-  void set_active_object(Object *p_object);
+  WorldObject *find_object_at(Vector2 p_world_position);
+  WorldObject *get_object_by_id(Object::ID p_id);
 
   bool is_running() const;
-  Object *get_active_object();
   size_t get_agent_count();
 
 private:
   std::vector<std::unique_ptr<Agent>> m_population;
   std::vector<std::unique_ptr<Food>> m_food;
-  std::optional<Object::ID> m_active_object_id;
   int m_spawn_distance = 1000;
   bool m_running = false;
   float m_speed = 1;
