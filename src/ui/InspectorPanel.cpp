@@ -3,7 +3,7 @@
 #include "../simulation/Agent.h"
 #include "../simulation/Food.h"
 #include "neuralnetwork/Genome.h"
-#include "ui/networkpanel/InputNode.h"
+#include "nodegraph/Node.h"
 #include <array>
 #include <cstddef>
 #include <imgui.h>
@@ -53,8 +53,11 @@ void InspectorPanel::inspect(Food &p_food) {
   }
 }
 
-void InspectorPanel::inspect(InputNode &p_input_node) {
-  ImGui::Text("nazwa: %s", p_input_node.get_name().c_str());
+void InspectorPanel::inspect(Node &p_node) {
+  ImGui::Text("ID: %lu", p_node.get_id());
+  ImGui::Text("Nazwa: %s", p_node.get_name().c_str());
+  ImGui::Text("Inputs: %zu", p_node.get_inputs().size());
+  ImGui::Text("Outputs: %zu", p_node.get_outputs().size());
 }
 
 void InspectorPanel::draw_genome_table(Agent &p_agent) {

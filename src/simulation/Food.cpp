@@ -1,7 +1,7 @@
 #include "Food.h"
 #include <raylib.h>
 
-#include "../ui/InspectorVisitor.h"
+#include "core/InspectorVisitor.h"
 
 namespace evosim {
 

@@ -1,33 +1,35 @@
 #include "NetworkGraph.h"
 
-#include ""
+#include "nodes/AddNode.h"
+#include "nodes/InputNode.h"
+#include "nodes/MultiplyNode.h"
+#include "nodes/OutputNode.h"
+
+#include <stdexcept>
 #include <utility>
 
 namespace evosim {
-  
-  Node& NetworkGraph::create_node(NODE_TYPE type, ImVec2 position) {
-  switch (type) {
-  case NODE_TYPE::INPUT:
-    return add_node(
-        std::make_unique<InputNode>(position, "Input"));
 
-  case NODE_TYPE::OUTPUT:
-    return add_node(
-        std::make_unique<OutputNode>(position, "Output"));
-
-  case NODE_TYPE::ADD:
-    return add_node(
-        std::make_unique<AddNode>(position, "Add"));
-
-  case NODE_TYPE::MULTIPLY:
-    return add_node(
-        std::make_unique<MultiplyNode>(position, "Multiply"));
+Node &NetworkGraph::create_node(NodeType p_type) {
+  switch (p_type) {
+  case NodeType::Input:
+    return add_node(std::make_unique<InputNode>());
+  case NodeType::Output:
+    return add_node(std::make_unique<OutputNode>());
+  case NodeType::Add:
+    return add_node(std::make_unique<AddNode>());
+  case NodeType::Multiply:
+    return add_node(std::make_unique<MultiplyNode>());
   }
 
-  throw std::invalid_argument("Unknown NODE_TYPE");
+  throw std::invalid_argument("Unknown node type");
 }
 
 Node &NetworkGraph::add_node(std::unique_ptr<Node> p_node) {
+  if (!p_node) {
+    throw std::invalid_argument("Cannot add a null node");
+  }
+
   m_nodes.push_back(std::move(p_node));
   return *m_nodes.back();
 }

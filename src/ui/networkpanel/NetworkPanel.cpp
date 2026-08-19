@@ -1,19 +1,17 @@
 #include "NetworkPanel.h"
-#include "InputNode.h"
 #include "core/Context.h"
 #include "imgui.h"
 #include "raylib.h"
 #include "simulation/Simulation.h"
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <optional>
 
 namespace evosim {
 
 void NetworkPanel::on_attach() {
-  m_context.network.add_node(
-      std::make_unique<InputNode>(ImVec2(300.F, 200.F), "test"));
+  create_node(NodeType::Input, ImVec2(300.F, 200.F));
+  create_node(NodeType::Output, ImVec2(600.F, 200.F));
 }
 
 void NetworkPanel::on_gui_render() {
@@ -41,6 +39,8 @@ void NetworkPanel::on_gui_render() {
     const Node &node = *node_ptr;
     draw_node(draw_list, node, m_context.selection.is_selected(node));
   }
+
+  handle_context_menu();
 
   ImGui::EndDisabled();
 
@@ -71,13 +71,15 @@ void NetworkPanel::draw_grid(ImDrawList *p_draw_list) {
 
 void NetworkPanel::draw_node(ImDrawList *p_draw_list, const Node &p_node,
                              bool p_is_selected) {
-  ImVec2 node_pos = grid_to_screen(p_node.get_position());
+  const NodeViewState &view = get_node_view(p_node);
+  const ImVec2 node_size = get_node_size(p_node);
+  ImVec2 node_pos = grid_to_screen(view.position);
 
-  ImVec2 node_max = {node_pos.x + p_node.get_size().x * m_zoom,
-                     node_pos.y + p_node.get_size().y * m_zoom};
+  ImVec2 node_max = {node_pos.x + node_size.x * m_zoom,
+                     node_pos.y + node_size.y * m_zoom};
 
   float rounding = 6.0f * m_zoom;
-  float header_height = p_node.get_header_height() * m_zoom;
+  float header_height = m_header_height * m_zoom;
   float header_font_size = 18.0f * m_zoom;
   float pin_radius = 5.0f * m_zoom;
   float pin_label_font_size = 14.0f * m_zoom;
@@ -199,6 +201,59 @@ void NetworkPanel::draw_connection_drag(ImDrawList *draw_list) {
                             IM_COL32(180, 180, 180, 255), 3.0f * m_zoom);
 }
 
+void NetworkPanel::handle_context_menu() {
+  static ImVec2 right_click_start{};
+  static ImVec2 popup_grid_position{};
+  static bool right_button_dragged = false;
+
+  if (ImGui::IsWindowHovered() &&
+      ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+    right_click_start = ImGui::GetIO().MousePos;
+    right_button_dragged = false;
+  }
+
+  if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+    right_button_dragged = true;
+  }
+
+  if (ImGui::IsWindowHovered() &&
+      ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !right_button_dragged) {
+    popup_grid_position = screen_to_grid(right_click_start);
+    ImGui::OpenPopup("NetworkContextMenu");
+  }
+
+  if (ImGui::BeginPopup("NetworkContextMenu")) {
+
+    if (ImGui::MenuItem("Add Input Node")) {
+      create_node(NodeType::Input, popup_grid_position);
+    }
+
+    if (ImGui::MenuItem("Add Output Node")) {
+      create_node(NodeType::Output, popup_grid_position);
+    }
+
+    if (ImGui::BeginMenu("Math")) {
+      if (ImGui::MenuItem("Add")) {
+        create_node(NodeType::Add, popup_grid_position);
+      }
+
+      if (ImGui::MenuItem("Multiply")) {
+        create_node(NodeType::Multiply, popup_grid_position);
+      }
+
+      ImGui::EndMenu();
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::MenuItem("Close")) {
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::EndPopup();
+  }
+}
+
 void NetworkPanel::handle_camera_input() {
   // PANNING
   if (ImGui::IsWindowHovered() &&
@@ -251,8 +306,9 @@ void NetworkPanel::handle_node_dragging() {
     if (m_dragging_node_id.has_value()) {
       Node *dragging_node = find_node_by_id(m_dragging_node_id.value());
       if (dragging_node) {
-        dragging_node->get_position().x += ImGui::GetIO().MouseDelta.x / m_zoom;
-        dragging_node->get_position().y += ImGui::GetIO().MouseDelta.y / m_zoom;
+        NodeViewState &view = get_node_view(*dragging_node);
+        view.position.x += ImGui::GetIO().MouseDelta.x / m_zoom;
+        view.position.y += ImGui::GetIO().MouseDelta.y / m_zoom;
       }
     }
   } else {
@@ -316,8 +372,9 @@ Node *NetworkPanel::get_node_from_grid_position(ImVec2 p_grid_position) {
   };
 
   for (auto &node_ptr : m_context.network.get_nodes()) {
-    Rectangle rect = {node_ptr->get_position().x, node_ptr->get_position().y,
-                      node_ptr->get_size().x, node_ptr->get_size().y};
+    const NodeViewState &view = get_node_view(*node_ptr);
+    const ImVec2 size = get_node_size(*node_ptr);
+    Rectangle rect = {view.position.x, view.position.y, size.x, size.y};
 
     if (CheckCollisionPointRec(position, rect)) {
       return node_ptr.get();
@@ -354,9 +411,9 @@ std::optional<ImVec2> NetworkPanel::get_input_pin_position(const Node &p_node,
   if (!index)
     return std::nullopt;
 
-  return ImVec2{p_node.get_position().x,
-                p_node.get_position().y + p_node.get_header_height() +
-                    p_node.get_spacing() * static_cast<float>(*index + 1)};
+  const ImVec2 position = get_node_view(p_node).position;
+  return ImVec2{position.x, position.y + m_header_height +
+                                m_pin_spacing * static_cast<float>(*index + 1)};
 }
 
 std::optional<ImVec2> NetworkPanel::get_output_pin_position(const Node &p_node,
@@ -366,9 +423,27 @@ std::optional<ImVec2> NetworkPanel::get_output_pin_position(const Node &p_node,
   if (!index)
     return std::nullopt;
 
-  return ImVec2{p_node.get_position().x + p_node.get_size().x,
-                p_node.get_position().y + p_node.get_header_height() +
-                    p_node.get_spacing() * static_cast<float>(*index + 1)};
+  const ImVec2 position = get_node_view(p_node).position;
+  return ImVec2{position.x + get_node_size(p_node).x,
+                position.y + m_header_height +
+                    m_pin_spacing * static_cast<float>(*index + 1)};
+}
+
+Node &NetworkPanel::create_node(NodeType p_type, ImVec2 p_position) {
+  Node &node = m_context.network.create_node(p_type);
+  m_node_views.emplace(node.get_id(), NodeViewState{.position = p_position});
+  return node;
+}
+
+NodeViewState &NetworkPanel::get_node_view(const Node &p_node) {
+  return m_node_views.try_emplace(p_node.get_id()).first->second;
+}
+
+ImVec2 NetworkPanel::get_node_size(const Node &p_node) const {
+  const std::size_t row_count =
+      std::max(p_node.get_inputs().size(), p_node.get_outputs().size());
+  const float content_height = static_cast<float>(row_count) * m_pin_spacing;
+  return ImVec2{m_node_width, content_height + m_header_height + m_pin_spacing};
 }
 
 ImVec2 NetworkPanel::grid_to_screen(ImVec2 p_position_on_grid) {

@@ -1,6 +1,6 @@
 #include "Agent.h"
-#include "../ui/InspectorVisitor.h"
 #include "Food.h"
+#include "core/InspectorVisitor.h"
 #include "neuralnetwork/NeuralNetwork.h"
 
 #include <algorithm>

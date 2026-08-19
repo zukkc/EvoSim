@@ -107,14 +107,17 @@ add_executable(
     src/simulation/Agent.cpp
     src/simulation/Food.cpp
     src/neuralnetwork/NeuralNetwork.cpp
-    src/neuralnetwork/NetworkGraph.cpp
+    src/nodegraph/NetworkGraph.cpp
+    src/nodegraph/Node.cpp
+    src/nodegraph/nodes/InputNode.cpp
+    src/nodegraph/nodes/OutputNode.cpp
+    src/nodegraph/nodes/AddNode.cpp
+    src/nodegraph/nodes/MultiplyNode.cpp
     src/ui/Theme.cpp
     src/ui/ViewportPanel.cpp
     src/ui/InspectorPanel.cpp
     src/ui/StatisticsPanel.cpp
     src/ui/networkpanel/NetworkPanel.cpp
-    src/ui/networkpanel/Node.cpp
-    src/ui/networkpanel/InputNode.cpp
 )
 
 target_include_directories(

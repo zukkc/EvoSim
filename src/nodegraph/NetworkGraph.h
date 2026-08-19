@@ -1,6 +1,8 @@
 #pragma once
 
-#include "ui/networkpanel/Node.h"
+#include "Connection.h"
+#include "Node.h"
+#include "NodeType.h"
 
 #include <memory>
 #include <vector>
@@ -9,6 +11,7 @@ namespace evosim {
 
 class NetworkGraph {
 public:
+  Node &create_node(NodeType p_type);
   Node &add_node(std::unique_ptr<Node> p_node);
   Node *get_node_by_id(Object::ID p_id);
 

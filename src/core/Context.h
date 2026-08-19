@@ -1,6 +1,6 @@
 #pragma once
 
-#include "neuralnetwork/NetworkGraph.h"
+#include "nodegraph/NetworkGraph.h"
 #include "simulation/Simulation.h"
 
 #include <optional>
