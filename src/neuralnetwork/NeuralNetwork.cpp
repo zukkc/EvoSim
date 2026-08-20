@@ -1,5 +1,4 @@
-#include "NeuralNetwork.h"
-#include "simulation/Simulation.h"
+#include <evosim/neuralnetwork/NeuralNetwork.h>
 #include <cmath>
 
 namespace evosim {

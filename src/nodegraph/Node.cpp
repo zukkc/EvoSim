@@ -1,17 +1,11 @@
 #include "Node.h"
 
-#include "core/InspectorVisitor.h"
-
 #include <algorithm>
 #include <utility>
 
 namespace evosim {
 
 Node::Node(std::string p_name) : m_name(std::move(p_name)) {}
-
-void Node::accept_inspector(InspectorVisitor &p_visitor) {
-  p_visitor.inspect(*this);
-}
 
 void Node::add_input_pin(std::string p_name) {
   m_inputs.emplace_back(m_next_pin_id++, std::move(p_name));

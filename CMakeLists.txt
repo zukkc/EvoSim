@@ -71,7 +71,6 @@ target_include_directories(imgui
         ${imgui_SOURCE_DIR}
 )
 
-# Opcjonalne ostrzeżenia tylko dla naszego targetu
 target_compile_features(imgui PUBLIC cxx_std_20)
 
 # --------------------------------------------------
@@ -95,17 +94,13 @@ target_link_libraries(rlimgui
 
 target_compile_features(rlimgui PUBLIC cxx_std_20)
 
-add_executable(
-    evosim
-    src/main.cpp
+add_library(
+    EvoSim STATIC
     src/core/Application.cpp
     src/core/Window.cpp
     src/core/Object.cpp
     src/layers/SimulationLayer.cpp
     src/layers/EditorLayer.cpp
-    src/simulation/Simulation.cpp
-    src/simulation/Agent.cpp
-    src/simulation/Food.cpp
     src/neuralnetwork/NeuralNetwork.cpp
     src/nodegraph/NetworkGraph.cpp
     src/nodegraph/Node.cpp
@@ -120,21 +115,31 @@ add_executable(
     src/ui/networkpanel/NetworkPanel.cpp
 )
 
+add_library(EvoSim::EvoSim ALIAS EvoSim)
+
 target_include_directories(
-    evosim
+    EvoSim
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include>
     PRIVATE
         src
 )
 
 target_link_libraries(
-    evosim
-    PRIVATE
+    EvoSim
+    PUBLIC
         rlimgui
+)
+
+target_compile_definitions(
+    EvoSim
+    PRIVATE
+        EVOSIM_ASSET_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(
-        evosim
+        EvoSim
         PRIVATE
             -Wall
             -Wextra
@@ -144,9 +149,19 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     )
 elseif(MSVC)
     target_compile_options(
-        evosim
+        EvoSim
         PRIVATE
             /W4
             /permissive-
     )
+endif()
+
+option(
+    EVOSIM_BUILD_EXAMPLES
+    "Build EvoSim examples"
+    ${PROJECT_IS_TOP_LEVEL}
+)
+
+if(EVOSIM_BUILD_EXAMPLES)
+    add_subdirectory(examples/EvolutionSimulation)
 endif()

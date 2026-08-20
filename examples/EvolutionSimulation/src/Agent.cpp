@@ -1,7 +1,6 @@
 #include "Agent.h"
 #include "Food.h"
-#include "core/InspectorVisitor.h"
-#include "neuralnetwork/NeuralNetwork.h"
+#include <evosim/neuralnetwork/NeuralNetwork.h>
 
 #include <algorithm>
 #include <array>
@@ -27,10 +26,6 @@ Agent::Agent(Vector2 p_position, std::array<float, 12> p_genome)
       m_neural_network(std::make_unique<NeuralNetwork>(p_genome)) {}
 
 Agent::~Agent() = default;
-
-void Agent::accept_inspector(InspectorVisitor &p_visitor) {
-  p_visitor.inspect(*this);
-}
 
 void Agent::update(float p_deltaTime,
                    const std::vector<std::unique_ptr<Food>> &p_all_food) {

@@ -2,7 +2,6 @@
 #include "core/Context.h"
 #include "imgui.h"
 #include "raylib.h"
-#include "simulation/Simulation.h"
 #include <algorithm>
 #include <cmath>
 #include <optional>
@@ -22,10 +21,9 @@ void NetworkPanel::on_gui_render() {
   handle_node_selection();
   handle_connection_input();
 
-  Simulation &sim = m_context.simulation;
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-  ImGui::BeginDisabled(sim.is_running());
+  ImGui::BeginDisabled(m_context.playback.is_running);
 
   draw_grid(draw_list);
 

@@ -8,7 +8,6 @@ namespace evosim {
 class Food : public Object2D {
 public:
   Food(Vector2 p_position);
-  void accept_inspector(InspectorVisitor &p_visitor) override;
   void render() const override;
 
   float consume();

@@ -20,9 +20,11 @@ SimulationLayer::~SimulationLayer() {
 }
 
 void SimulationLayer::on_update(float p_dt) {
-  // if speed up wanted
-  // const float scaled_dt = dt * m_context.simulation_speed;
-  m_context.simulation.update(p_dt);
+  if (!m_context.playback.is_running || !m_context.simulation) {
+    return;
+  }
+
+  m_context.simulation->update(p_dt * m_context.playback.time_scale);
 }
 
 void SimulationLayer::on_render() {
@@ -32,15 +34,17 @@ void SimulationLayer::on_render() {
   ClearBackground(BLACK);
 
   BeginMode2D(m_context.viewport.camera);
-  m_context.simulation.render();
+  if (m_context.simulation) {
+    m_context.simulation->render();
+  }
 
   const std::optional<Object::ID> selected_id =
       m_context.selection.get_selected_id();
   if (selected_id) {
-    WorldObject *selected_object =
-        m_context.simulation.get_object_by_id(*selected_id);
+    Object *selected_object =
+        m_context.simulation->find_object_by_id(*selected_id);
     if (selected_object) {
-      selected_object->render_selection_overlay();
+      m_context.simulation->render_selection_overlay(*selected_object);
     }
   }
 

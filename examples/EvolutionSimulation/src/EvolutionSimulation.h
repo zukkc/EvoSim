@@ -1,4 +1,7 @@
 #pragma once
+
+#include <evosim/EvoSim.h>
+
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -6,7 +9,7 @@
 #include <vector>
 
 #include "Object2D.h"
-#include "neuralnetwork/Genome.h"
+#include <evosim/neuralnetwork/Genome.h>
 
 namespace evosim {
 
@@ -26,36 +29,27 @@ struct FoodSpawnParams {
   float initial_energy = 100.0f;
 };
 
-class Simulation {
+class EvolutionSimulation final : public ISimulation {
 public:
-  enum Speed {
-    SLOWER,
-    NORMAL,
-    FASTER,
-  };
+  EvolutionSimulation();
+  ~EvolutionSimulation() override;
 
-public:
-  Simulation();
-  ~Simulation();
-  void update(float p_dt);
-  void render() const;
+  void update(float p_dt) override;
+  void render() const override;
+  void render_selection_overlay(const Object &p_object) const override;
 
-  void start_simulation();
-  void end_simulation();
-  void set_simulation_speed(Speed p_speed);
-  float get_simulation_speed() const;
-  WorldObject *find_object_at(Vector2 p_world_position);
-  WorldObject *get_object_by_id(Object::ID p_id);
+  Object *find_object_at(Vector2 p_world_position) override;
+  Object *find_object_by_id(Object::ID p_id) override;
 
-  bool is_running() const;
-  size_t get_agent_count();
+  void draw_inspector(Object &p_object) override;
+  void draw_statistics() override;
+
+  std::size_t get_agent_count() const;
 
 private:
   std::vector<std::unique_ptr<Agent>> m_population;
   std::vector<std::unique_ptr<Food>> m_food;
   int m_spawn_distance = 1000;
-  bool m_running = false;
-  float m_speed = 1;
 
   bool is_point_inside_agent(Vector2 p_point, const Object2D &p_object);
   std::unique_ptr<Agent> create_agent(AgentSpawnParams p_params);

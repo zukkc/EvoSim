@@ -6,12 +6,11 @@
 #include <vector>
 
 #include "Object2D.h"
-#include "neuralnetwork/Genome.h"
+#include <evosim/neuralnetwork/Genome.h>
 
 namespace evosim {
 
 class NeuralNetwork;
-class InspectorVisitor;
 class Food;
 
 struct ClosestFoodData {
@@ -25,7 +24,6 @@ public:
   Agent(Vector2 p_position);
   Agent(Vector2 p_position, std::array<float, 12> p_genome);
   ~Agent();
-  void accept_inspector(InspectorVisitor &p_visitor) override;
 
   void update(float p_deltaTime,
               const std::vector<std::unique_ptr<Food>> &p_all_food);

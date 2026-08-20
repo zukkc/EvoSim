@@ -1,9 +1,13 @@
 #pragma once
 
-#include "nodegraph/NetworkGraph.h"
-#include "simulation/Simulation.h"
+#include <evosim/ISimulation.h>
 
+#include "nodegraph/NetworkGraph.h"
+
+#include <algorithm>
+#include <memory>
 #include <optional>
+#include <utility>
 
 struct ImFont;
 
@@ -24,6 +28,15 @@ struct ViewportContext {
   int requested_height = 1;
 
   Camera2D camera{};
+};
+
+struct PlaybackContext {
+  bool is_running = false;
+  float time_scale = 1.0F;
+
+  void slow_down() { time_scale = std::max(0.125F, time_scale * 0.5F); }
+  void reset_speed() { time_scale = 1.0F; }
+  void speed_up() { time_scale = std::min(16.0F, time_scale * 2.0F); }
 };
 
 class SelectionContext {
@@ -51,15 +64,21 @@ private:
 };
 
 struct AppContext {
+  explicit AppContext(std::unique_ptr<ISimulation> p_simulation)
+      : simulation(std::move(p_simulation)) {}
+
+  std::unique_ptr<ISimulation> simulation;
   UIContext ui;
-  Simulation simulation;
   NetworkGraph network;
   ViewportContext viewport;
+  PlaybackContext playback;
   SelectionContext selection;
 
   Object *find_object_by_id(Object::ID p_id) {
-    if (Object *object = simulation.get_object_by_id(p_id)) {
-      return object;
+    if (simulation) {
+      if (Object *object = simulation->find_object_by_id(p_id)) {
+        return object;
+      }
     }
 
     return network.get_node_by_id(p_id);

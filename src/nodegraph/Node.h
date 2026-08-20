@@ -10,8 +10,6 @@ namespace evosim {
 
 class Node : public Object {
 public:
-  void accept_inspector(InspectorVisitor &p_visitor) override;
-
   void add_input_pin(std::string p_name);
   void remove_input_pin(PinID p_pin_id);
   void add_output_pin(std::string p_name);

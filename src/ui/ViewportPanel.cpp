@@ -3,7 +3,6 @@
 #include "extras/IconsFontAwesome6.h"
 #include "imgui.h"
 #include "raylib.h"
-#include "simulation/Simulation.h"
 
 #include <algorithm>
 #include <cmath>
@@ -121,8 +120,10 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered,
 
   // CLICKING
   if (p_is_viewport_hovered && ImGui::IsMouseClicked(click_button)) {
-    Simulation &simulation = m_context.simulation;
-    Object *found = simulation.find_object_at(mouse_world_position);
+    Object *found = m_context.simulation
+                        ? m_context.simulation->find_object_at(
+                              mouse_world_position)
+                        : nullptr;
     m_context.selection.select(found);
   }
   // =======
@@ -130,7 +131,7 @@ void ViewportPanel::handle_input(bool p_is_viewport_hovered,
 
 bool ViewportPanel::draw_viewport_controls(const ImVec2 &image_min,
                                            const ImVec2 &image_max) {
-  Simulation &sim = m_context.simulation;
+  PlaybackContext &playback = m_context.playback;
   const float button_size = 32.0f;
   const float spacing = 4.0f;
   const float large_spacing = 20.0f;
@@ -164,18 +165,18 @@ bool ViewportPanel::draw_viewport_controls(const ImVec2 &image_min,
 
   ImGui::SetCursorPos({padding, padding});
 
-  ImGui::BeginDisabled(sim.is_running());
+  ImGui::BeginDisabled(playback.is_running);
   if (ImGui::Button(ICON_FA_PLAY, {button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::NORMAL);
-    sim.start_simulation();
+    playback.reset_speed();
+    playback.is_running = true;
   }
   ImGui::EndDisabled();
 
   ImGui::SameLine(0.0f, spacing);
 
-  ImGui::BeginDisabled(!sim.is_running());
+  ImGui::BeginDisabled(!playback.is_running);
   if (ImGui::Button(ICON_FA_PAUSE, {button_size, button_size})) {
-    sim.end_simulation();
+    playback.is_running = false;
   }
   ImGui::EndDisabled();
 
@@ -183,26 +184,27 @@ bool ViewportPanel::draw_viewport_controls(const ImVec2 &image_min,
 
   ImGui::BeginDisabled();
   if (ImGui::Button(ICON_FA_STOP, {button_size, button_size})) {
-    sim.end_simulation();
+    playback.is_running = false;
+    playback.reset_speed();
   }
   ImGui::EndDisabled();
 
   ImGui::SameLine(0.0f, large_spacing);
 
   if (ImGui::Button(ICON_FA_ANGLES_LEFT, {button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::SLOWER);
+    playback.slow_down();
   }
 
   ImGui::SameLine(0.0f, spacing);
 
   if (ImGui::Button(ICON_FA_ANGLE_RIGHT, {button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::NORMAL);
+    playback.reset_speed();
   }
 
   ImGui::SameLine(0.0f, spacing);
 
   if (ImGui::Button(ICON_FA_ANGLES_RIGHT, {button_size, button_size})) {
-    sim.set_simulation_speed(Simulation::Speed::FASTER);
+    playback.speed_up();
   }
 
   const bool hovered =

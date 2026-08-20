@@ -1,9 +1,3 @@
-#include <array>
+#pragma once
 
-namespace evosim {
-
-using Genome = std::array<float, 12>;
-using NeuronInputs = std::array<float, 5>;
-using NeuronOutputs = std::array<float, 2>;
-
-} // namespace evosim
+#include <evosim/neuralnetwork/Genome.h>
