@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Panel.h"
+#include "Panel.h"
 #include "nodegraph/NetworkGraph.h"
 #include <imgui.h>
 #include <optional>

@@ -112,7 +112,7 @@ add_library(
     src/ui/ViewportPanel.cpp
     src/ui/InspectorPanel.cpp
     src/ui/StatisticsPanel.cpp
-    src/ui/networkpanel/NetworkPanel.cpp
+    src/ui/NetworkPanel.cpp
 )
 
 add_library(EvoSim::EvoSim ALIAS EvoSim)
